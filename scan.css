@@ -92,6 +92,17 @@
   border-color: var(--border-hover);
 }
 
+.drop-zone:active {
+  transform: scale(0.99);
+  background-color: var(--bg-card);
+}
+
+.drop-zone:focus-visible {
+  outline: 2px solid var(--border-focus) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px var(--accent-ai-glow) !important;
+}
+
 .drop-zone.drag-active {
   border-color: var(--accent-ai);
   background-color: var(--accent-ai-tint);
@@ -204,6 +215,17 @@
 
 .advanced-summary:hover {
   color: var(--text-primary);
+  background-color: var(--neutral-subtle);
+}
+
+.advanced-summary:active {
+  background-color: var(--bg-card);
+}
+
+.advanced-summary:focus-visible {
+  outline: 2px solid var(--border-focus) !important;
+  outline-offset: -2px !important;
+  box-shadow: 0 0 0 2px var(--accent-ai-glow) !important;
 }
 
 .advanced-summary-icon {

@@ -72,6 +72,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (dropZone && fileInput) {
     dropZone.addEventListener('click', () => fileInput.click());
 
+    dropZone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        fileInput.click();
+      }
+    });
+
     ['dragenter', 'dragover'].forEach(eventName => {
       dropZone.addEventListener(eventName, (e) => {
         e.preventDefault();

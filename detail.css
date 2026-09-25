@@ -145,6 +145,19 @@
   transition: all 0.15s ease;
 }
 
+.preview-tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.preview-tab-btn:active {
+  transform: scale(0.96);
+}
+
+.preview-tab-btn:focus-visible {
+  outline: 2px solid var(--border-focus) !important;
+  outline-offset: 1px !important;
+}
+
 .preview-tab-btn.active {
   background-color: var(--bg-card);
   color: var(--text-primary);
@@ -326,13 +339,19 @@
 
 /* Focus-visible for keyboard users tabbing through chips */
 .block-chip:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 1px;
+  outline: 2px solid var(--border-focus) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px var(--accent-ai-glow) !important;
 }
 
 .block-chip:hover {
   border-color: var(--border-hover);
   background-color: var(--neutral-subtle);
+}
+
+.block-chip:active {
+  transform: scale(0.99);
+  background-color: var(--bg-card);
 }
 
 /* Left part of chip: Dot + Seq + Monospace Block ID */

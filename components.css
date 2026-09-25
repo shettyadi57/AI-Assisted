@@ -233,10 +233,15 @@ body {
   background-color: var(--neutral-subtle);
 }
 
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+  background-color: var(--bg-card);
+}
+
 .btn:focus-visible {
-  outline: none;
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 2px var(--accent-ai-glow);
+  outline: 2px solid var(--border-focus) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px var(--accent-ai-glow) !important;
 }
 
 .btn:disabled {

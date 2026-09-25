@@ -886,3 +886,157 @@
   color: var(--accent-ai);
   letter-spacing: 0.02em;
 }
+
+/* ==========================================================================
+   CHUNK 5 INTERACTION STATES AUDIT PASS (150ms ease timing everywhere)
+   ========================================================================== */
+.toolbar-btn:active {
+  transform: scale(0.98);
+  background-color: var(--bg-card);
+}
+
+.action-btn:active {
+  transform: scale(0.98);
+  background-color: var(--bg-card);
+}
+
+.nav-item:active {
+  transform: scale(0.98);
+}
+
+.filter-select:active {
+  border-color: var(--border-focus);
+}
+
+.search-input:active {
+  border-color: var(--border-focus);
+}
+
+.triage-table tbody tr:active {
+  background-color: var(--neutral-subtle);
+}
+
+/* High-Visibility Focus-Visible Rings (Accessibility) */
+.toolbar-btn:focus-visible,
+.action-btn:focus-visible,
+.filter-select:focus-visible,
+.search-input:focus-visible,
+.nav-item:focus-visible {
+  outline: 2px solid var(--border-focus) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px var(--accent-ai-glow) !important;
+}
+
+.triage-table tbody tr:focus-visible {
+  outline: 2px solid var(--border-focus) !important;
+  outline-offset: -2px !important;
+  box-shadow: 0 0 0 2px var(--accent-ai-glow) !important;
+}
+
+/* ==========================================================================
+   CHUNK 5 RESPONSIVE AUDIT: MOBILE BOTTOM TAB BAR & LAYOUT REFLOW
+   Mobile: 375px | Tablet: 768px | Desktop: 1280px+
+   Sidebar collapses to ergonomic bottom tab bar on mobile.
+   ========================================================================== */
+@media (max-width: 640px) {
+  .topbar {
+    padding: 0 var(--space-12);
+  }
+
+  .brand-name {
+    font-size: var(--text-sm);
+  }
+
+  .brand-tag {
+    display: none; /* Conserve topbar space on mobile */
+  }
+
+  .active-scan-badge {
+    padding: var(--space-4) var(--space-8);
+    font-size: 10px;
+  }
+
+  .active-scan-counter {
+    display: none; /* Compact indicator on mobile */
+  }
+
+  .workspace {
+    flex-direction: column;
+  }
+
+  /* Ergonomic Bottom Navigation Tab Bar for Field Forensics */
+  .sidebar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100% !important;
+    height: var(--space-64);
+    background-color: var(--bg-card);
+    border-right: none;
+    border-top: var(--border-width) solid var(--border-default);
+    flex-direction: row;
+    align-items: center;
+    padding: 0 var(--space-8);
+    z-index: 200;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.4);
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+    gap: var(--space-4);
+  }
+
+  .nav-item {
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--space-4) 0;
+    gap: 2px;
+    font-size: 10px;
+    min-height: 48px; /* ≥44px touch target */
+  }
+
+  .nav-item .icon-ui {
+    width: 18px;
+    height: 18px;
+  }
+
+  .sidebar-footer {
+    display: none; /* Hide collapse toggle on mobile */
+  }
+
+  .main-content {
+    padding: var(--space-16) var(--space-8);
+    padding-bottom: calc(var(--space-64) + var(--space-32)); /* Prevent overlap */
+  }
+
+  /* Contained Horizontal Table Scrolling on Small Screens */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .triage-table {
+    min-width: 680px; /* Preserve strict column alignment without distortion */
+  }
+
+  .toolbar-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-box {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .filter-select,
+  .toolbar-btn {
+    width: 100%;
+    min-height: 44px; /* ≥44px touch target */
+  }
+}
+
