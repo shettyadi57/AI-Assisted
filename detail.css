@@ -1,0 +1,529 @@
+/**
+ * RECONSTRUCT — FRAGMENT DETAIL & RELATIONSHIP VIEW STYLES (Chunk 3/5)
+ * Built exclusively using Chunk 1 tokens. Zero arbitrary values.
+ */
+
+/* ==========================================================================
+   DETAIL CONTAINER & HEADER ROW
+   ========================================================================== */
+.detail-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rhythm-region); /* 32px vertical rhythm between major regions */
+  width: 100%;
+}
+
+.detail-header-card {
+  background-color: var(--bg-card);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-card); /* 12px */
+  padding: var(--space-24); /* Symmetric 24px padding */
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+.detail-top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.detail-header-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+}
+
+.detail-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+}
+
+.detail-type-icon-box {
+  width: var(--space-48);
+  height: var(--space-48);
+  border-radius: var(--radius-component); /* 6px */
+  background-color: var(--accent-ai-tint);
+  border: var(--border-width) solid var(--accent-ai-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-ai);
+  flex-shrink: 0;
+}
+
+.detail-filename {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  line-height: var(--leading-tight);
+}
+
+.detail-meta-text {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  margin-top: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   TWO-COLUMN LAYOUT (60/40 Split on Desktop, Stacks on Mobile/Tablet)
+   ========================================================================== */
+.detail-columns-grid {
+  display: grid;
+  grid-template-columns: 6fr 4fr; /* 60% / 40% split */
+  gap: var(--space-24); /* 24px desktop gutter */
+  align-items: stretch;
+}
+
+@media (max-width: 1024px) {
+  .detail-columns-grid {
+    grid-template-columns: minmax(0, 1fr); /* Single column stack */
+    gap: var(--space-16);
+  }
+}
+
+/* ==========================================================================
+   LEFT COLUMN: CONTENT PREVIEW
+   Bounded, scrollable, never overflowing the card
+   ========================================================================== */
+.preview-card {
+  background-color: var(--bg-card);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-card); /* 12px */
+  padding: var(--space-24);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--card-shadow);
+  height: 100%;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-16);
+  padding-bottom: var(--space-12);
+  border-bottom: var(--border-width) solid var(--border-default);
+}
+
+.preview-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.preview-tabs {
+  display: flex;
+  gap: var(--space-4);
+  background-color: var(--bg-raised);
+  padding: var(--space-4);
+  border-radius: var(--radius-component);
+  border: var(--border-width) solid var(--border-default);
+}
+
+.preview-tab-btn {
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  border-radius: var(--radius-chip);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.preview-tab-btn.active {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: var(--card-shadow);
+}
+
+/* Scrollable Container (Hard bounded to avoid overflow) */
+.preview-viewport {
+  flex: 1;
+  max-height: 480px;
+  overflow-y: auto;
+  overflow-x: auto;
+  background-color: var(--bg-raised);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-component); /* 6px */
+  padding: var(--space-16);
+  position: relative;
+}
+
+/* Monospace Text / JSON / Log Preview */
+.code-viewport {
+  font-family: var(--font-mono) !important;
+  font-size: var(--text-xs);
+  line-height: var(--leading-relaxed);
+  color: var(--text-primary);
+  white-space: pre;
+  margin: 0;
+}
+
+/* Inferred Metadata View (For Databases / Binaries without visual preview) */
+.metadata-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+.meta-notice-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
+  background-color: var(--bg-card);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-component);
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+
+.metadata-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-12);
+}
+
+.metadata-item {
+  background-color: var(--bg-card);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-component);
+  padding: var(--space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.metadata-label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metadata-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+/* Image Preview Container */
+.image-preview-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-12);
+  min-height: 280px;
+}
+
+.image-preview-render {
+  max-width: 100%;
+  max-height: 340px;
+  border-radius: var(--radius-component);
+  border: var(--border-width) solid var(--border-default);
+  object-fit: contain;
+  background-color: #000;
+}
+
+/* ==========================================================================
+   RIGHT COLUMN: "FRAGMENT CHAIN" & BLOCK RELATIONSHIPS
+   Visual answer to "how were these fragments related"
+   Every chip has identical height, width, padding, and radius.
+   ========================================================================== */
+.fragment-chain-card {
+  background-color: var(--bg-card);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-card); /* 12px */
+  padding: var(--space-24);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--card-shadow);
+  height: 100%;
+}
+
+.chain-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-16);
+  padding-bottom: var(--space-12);
+  border-bottom: var(--border-width) solid var(--border-default);
+}
+
+.chain-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.chain-scroll-area {
+  flex: 1;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Gap handled by sequence connector line */
+}
+
+/* Fragment Sequence Step */
+.chain-step {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Vertical Connecting Sequence Line */
+.chain-connector {
+  width: 2px;
+  height: var(--space-16); /* Exact 16px sequence gap connector */
+  background-color: var(--border-default);
+  margin-left: 20px; /* Center-aligned through status dot axis */
+  position: relative;
+  transition: background-color 0.15s ease;
+}
+
+.chain-step:last-child .chain-connector {
+  display: none;
+}
+
+/* Block Chip Component (Strictly identical height/width/padding/radius) */
+.block-chip {
+  width: 100%;
+  height: 44px; /* Fixed uniform height for all chips */
+  padding: 0 var(--space-12); /* Symmetric horizontal padding */
+  border-radius: var(--radius-chip); /* Strict 4px radius token */
+  border: var(--border-width) solid var(--border-default);
+  background-color: var(--bg-raised);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+/* Focus-visible for keyboard users tabbing through chips */
+.block-chip:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+.block-chip:hover {
+  border-color: var(--border-hover);
+  background-color: var(--neutral-subtle);
+}
+
+/* Left part of chip: Dot + Seq + Monospace Block ID */
+.chip-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+/* Status Indicator Dot (Clean vs Corrupted) */
+.chip-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chip-status-dot.clean {
+  background-color: var(--status-high);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+}
+
+.chip-status-dot.review {
+  background-color: var(--status-medium);
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
+}
+
+.chip-status-dot.corrupted {
+  background-color: var(--status-low);
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+}
+
+.chip-seq-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  width: 24px;
+}
+
+.chip-block-id {
+  font-family: var(--font-mono) !important; /* Hard rule: Monospace Block ID */
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+/* Right part of chip: Status Tag */
+.chip-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--font-medium);
+  padding: 2px var(--space-4);
+  border-radius: var(--radius-chip);
+}
+
+.chip-tag.clean {
+  background-color: var(--status-high-tint);
+  color: var(--status-high);
+}
+
+.chip-tag.review {
+  background-color: var(--status-medium-tint);
+  color: var(--status-medium);
+}
+
+.chip-tag.corrupted {
+  background-color: var(--status-low-tint);
+  color: var(--status-low);
+}
+
+/* Interactive Chip Tooltip (Shows raw byte offset & size on hover) */
+.chip-tooltip {
+  position: absolute;
+  bottom: calc(100% + var(--space-4));
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background-color: var(--bg-page);
+  border: var(--border-width) solid var(--border-hover);
+  border-radius: var(--radius-component); /* 6px */
+  padding: var(--space-8) var(--space-12);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 50;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.block-chip:hover .chip-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.tooltip-line {
+  font-family: var(--font-mono) !important; /* Hard rule: Monospace */
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.tooltip-line strong {
+  color: var(--accent-ai);
+}
+
+/* ==========================================================================
+   FULL-WIDTH CONFIDENCE BREAKDOWN
+   Short list of factors feeding the score, left-aligned to single x-coordinate
+   ========================================================================== */
+.confidence-breakdown-card {
+  background-color: var(--bg-card);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-card); /* 12px */
+  padding: var(--space-24);
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+.breakdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.breakdown-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  width: 100%;
+}
+
+.breakdown-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-component); /* 6px */
+  background-color: var(--bg-raised);
+  border: var(--border-width) solid var(--border-default);
+  transition: border-color 0.15s ease;
+}
+
+.breakdown-item:hover {
+  border-color: var(--border-hover);
+}
+
+.breakdown-icon-box {
+  width: var(--icon-dense); /* Exact 16px scale from Chunk 1 */
+  height: var(--icon-dense);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.breakdown-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.breakdown-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.breakdown-desc {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  line-height: var(--leading-normal);
+}
+
+.breakdown-metric {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--accent-ai);
+}

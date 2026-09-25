@@ -211,6 +211,43 @@ const LUCIDE_ICONS = {
     <svg class="${size === 16 ? 'icon-dense' : 'icon-ui'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
       <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+    </svg>`,
+
+  arrowLeft: (size = 20) => `
+    <svg class="${size === 16 ? 'icon-dense' : 'icon-ui'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+    </svg>`,
+
+  link: (size = 20) => `
+    <svg class="${size === 16 ? 'icon-dense' : 'icon-ui'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+    </svg>`,
+
+  info: (size = 20) => `
+    <svg class="${size === 16 ? 'icon-dense' : 'icon-ui'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 16v-4"/>
+      <path d="M12 8h.01"/>
+    </svg>`,
+
+  layers: (size = 20) => `
+    <svg class="${size === 16 ? 'icon-dense' : 'icon-ui'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+      <polyline points="2 17 12 22 22 17"/>
+      <polyline points="2 12 12 17 22 12"/>
+    </svg>`,
+
+  uploadCloud: (size = 20) => `
+    <svg class="${size === 16 ? 'icon-dense' : 'icon-ui'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+      <path d="M12 12v9"/>
+      <path d="m16 16-4-4-4 4"/>
+    </svg>`,
+
+  chevronDown: (size = 20) => `
+    <svg class="${size === 16 ? 'icon-dense' : 'icon-ui'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"/>
     </svg>`
 };
 

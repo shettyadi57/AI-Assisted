@@ -1,0 +1,381 @@
+/**
+ * RECONSTRUCT — SCAN TRIGGER, PROGRESS & UPLOAD SCREEN STYLES (Chunk 4/5)
+ * Centered 480px card containing Idle, In-Progress, and Complete states.
+ * Reuses Chunk 1 tokens and Chunk 2 stat cards exactly.
+ */
+
+/* ==========================================================================
+   CENTERED SCAN CONTAINER
+   Max-width 480px down to tablet; full-width with 16px side padding on mobile.
+   ========================================================================== */
+.scan-screen-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - var(--space-64) - var(--space-64));
+  width: 100%;
+  padding: var(--space-24) 0;
+}
+
+.scan-card {
+  width: 100%;
+  max-width: 480px; /* Exact max-width 480px */
+  background-color: var(--bg-card);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-card); /* 12px */
+  padding: var(--space-24); /* Symmetric 24px padding on all 3 states */
+  box-shadow: var(--card-shadow);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .scan-card {
+    max-width: 100%;
+    padding: var(--space-16); /* 16px padding on mobile */
+  }
+}
+
+.scan-card-header {
+  text-align: center;
+  margin-bottom: var(--space-24);
+}
+
+.scan-card-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+}
+
+.scan-card-subtitle {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  line-height: var(--leading-normal);
+}
+
+/* ==========================================================================
+   STATE 1: IDLE / SETUP STATE
+   ========================================================================== */
+.scan-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16); /* 16px vertical rhythm */
+}
+
+/* File Drop Zone (Dashed border, 12px radius, min 44px touch targets) */
+.drop-zone {
+  border: 2px dashed var(--border-default);
+  border-radius: var(--radius-card); /* 12px */
+  background-color: var(--bg-raised);
+  padding: var(--space-24) var(--space-16);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  position: relative;
+  user-select: none;
+}
+
+.drop-zone:hover {
+  border-color: var(--border-hover);
+}
+
+.drop-zone.drag-active {
+  border-color: var(--accent-ai);
+  background-color: var(--accent-ai-tint);
+}
+
+.drop-zone.error {
+  border-color: var(--status-low);
+  background-color: var(--status-low-tint);
+}
+
+.drop-icon-box {
+  width: var(--space-48);
+  height: var(--space-48);
+  border-radius: 50%;
+  background-color: var(--bg-card);
+  border: var(--border-width) solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-ai);
+  transition: transform 0.15s ease;
+}
+
+.drop-zone:hover .drop-icon-box {
+  transform: translateY(-2px);
+}
+
+.drop-primary-text {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.drop-subtext {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.drop-selected-file {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--accent-ai);
+  background-color: var(--accent-ai-tint);
+  border: var(--border-width) solid var(--accent-ai-border);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-chip);
+  margin-top: var(--space-4);
+  word-break: break-all;
+}
+
+/* Inline Error Message (Using --status-low) */
+.drop-error-msg {
+  display: none;
+  font-size: var(--text-xs);
+  color: var(--status-low);
+  margin-top: var(--space-4);
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+.drop-error-msg.active {
+  display: flex;
+}
+
+/* Fallback Path Input */
+.path-fallback-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.path-fallback-divider::before,
+.path-fallback-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: var(--border-default);
+}
+
+/* Advanced Options Disclosure */
+.advanced-disclosure {
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-component); /* 6px */
+  background-color: var(--bg-raised);
+  overflow: hidden;
+}
+
+.advanced-summary {
+  padding: var(--space-8) var(--space-12);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  list-style: none;
+  min-height: 44px; /* ≥44px touch target on mobile */
+}
+
+.advanced-summary::-webkit-details-marker {
+  display: none;
+}
+
+.advanced-summary:hover {
+  color: var(--text-primary);
+}
+
+.advanced-summary-icon {
+  transition: transform 0.2s ease;
+}
+
+details[open] .advanced-summary-icon {
+  transform: rotate(180deg);
+}
+
+.advanced-content {
+  padding: var(--space-12);
+  border-top: var(--border-width) solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+/* Start CTA Button (Touch target ≥44px) */
+.scan-cta-btn {
+  width: 100%;
+  min-height: 44px; /* Strict ≥44px tall touch target */
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+}
+
+/* ==========================================================================
+   STATE 2: IN-PROGRESS STATE
+   Horizontal progress bar, monospace counter, auto-scrolling telemetry
+   ========================================================================== */
+.progress-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+.progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.progress-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--accent-ai);
+}
+
+/* Horizontal Progress Bar (--accent-ai fill) */
+.scan-bar-track {
+  width: 100%;
+  height: 8px;
+  background-color: var(--bg-raised);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-chip); /* 4px */
+  overflow: hidden;
+  position: relative;
+}
+
+.scan-bar-fill-live {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-ai), #38BDF8);
+  border-radius: var(--radius-chip);
+  transition: width 0.25s linear;
+}
+
+/* Monospace Live Counter */
+.scan-live-counter {
+  font-family: var(--font-mono) !important;
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.scan-pct-badge {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--accent-ai);
+  background-color: var(--accent-ai-tint);
+  padding: 2px var(--space-8);
+  border-radius: var(--radius-chip);
+}
+
+/* Running Log-Style Telemetry Feed (Auto-scrolls, never overflows card) */
+.scan-log-box {
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: var(--bg-raised);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-component); /* 6px */
+  padding: var(--space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  scroll-behavior: smooth;
+}
+
+.scan-log-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+}
+
+.log-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.log-time {
+  font-family: var(--font-mono) !important;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.log-text {
+  font-family: var(--font-sans);
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.log-text strong {
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   STATE 3: COMPLETE STATE
+   Reuses Chunk 2 4-stat-card pattern (Total, High, Needs Review, Low)
+   ========================================================================== */
+.complete-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+  text-align: center;
+}
+
+.complete-hero-icon {
+  width: var(--space-64);
+  height: var(--space-64);
+  border-radius: 50%;
+  background-color: var(--status-high-tint);
+  border: var(--border-width) solid var(--status-high-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--status-high);
+  margin: 0 auto;
+}
+
+/* Complete State 2x2 Mini Stat Grid (Reusing Chunk 2 stat cards) */
+.complete-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-12);
+  text-align: left;
+}
+
+.complete-stats-grid .stat-card {
+  padding: var(--space-16); /* Symmetric 16px inside 480px card */
+  gap: var(--space-8);
+}
+
+.complete-stats-grid .stat-value {
+  font-size: var(--text-2xl);
+}
