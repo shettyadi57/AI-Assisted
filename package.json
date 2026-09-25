@@ -1,0 +1,20 @@
+{
+  "name": "reconstruct-forensics-dashboard",
+  "version": "1.0.0",
+  "description": "Reconstruct — AI-assisted digital forensics dashboard for cybersecurity storage reconstruction",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "forensics",
+    "cybersecurity",
+    "design-system",
+    "tokens",
+    "hex-carving",
+    "storage"
+  ],
+  "author": "Reconstruct Forensics Team",
+  "license": "MIT"
+}

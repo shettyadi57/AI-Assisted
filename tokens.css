@@ -1,0 +1,182 @@
+/**
+ * RECONSTRUCT — FORENSIC DESIGN SYSTEM TOKENS (Chunk 1/5)
+ * Security & Digital Forensics Dashboard
+ * 
+ * Strict Guidelines:
+ * - 4px modular spacing scale (4, 8, 12, 16, 24, 32, 48, 64) — zero arbitrary px
+ * - 12-column responsive grid (24px desktop, 16px tablet, 8px mobile gutters)
+ * - Vertical rhythm: 16px form fields, 24px sections, 32px regions
+ * - Forensic Dark as primary theme with 3 distinct charcoal elevation steps
+ * - Dual typography: Sans-serif for UI labels/prose; Monospace for technical data ONLY
+ * - Semantic status colors paired with 10-15% opacity background tints
+ * - Standardized component tokens: 1px borders, fixed radii (4px, 6px, 12px), 16px/20px icons
+ */
+
+/* ==========================================================================
+   ROOT: DEFAULT FORENSIC DARK THEME
+   ========================================================================== */
+:root {
+  /* ------------------------------------------------------------------------
+     1. SPACING SYSTEM (4px modular base unit — NO arbitrary px values)
+     ------------------------------------------------------------------------ */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-48: 48px;
+  --space-64: 64px;
+
+  /* Strict Vertical Rhythm Tokens */
+  --rhythm-form: var(--space-16);    /* 16px between form fields */
+  --rhythm-section: var(--space-24); /* 24px between sections */
+  --rhythm-region: var(--space-32);  /* 32px between major page regions */
+
+  /* 12-Column Grid System */
+  --grid-columns: 12;
+  --grid-gutter-desktop: var(--space-24); /* 24px desktop gutter */
+  --grid-gutter-tablet: var(--space-16);  /* 16px tablet gutter */
+  --grid-gutter-mobile: var(--space-8);   /* 8px mobile gutter */
+
+  /* ------------------------------------------------------------------------
+     2. TYPOGRAPHY SYSTEM
+     Hard Rule: Monospace for hashes, block IDs, byte offsets, hex previews,
+     timestamps, file sizes. Sans-serif for all UI labels, nav, and prose.
+     ------------------------------------------------------------------------ */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Roboto Mono', 'SF Mono', Consolas, 'Courier New', monospace;
+
+  /* Font Sizes */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 32px;
+
+  /* Line Heights */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* ------------------------------------------------------------------------
+     3. COMPONENT TOKENS
+     ------------------------------------------------------------------------ */
+  /* Border Radii */
+  --radius-chip: 4px;         /* Small chips, block-ID tags */
+  --radius-component: 6px;    /* Buttons, inputs, badges */
+  --radius-card: 12px;        /* Cards, panels, modal dialogs */
+
+  /* Border Width (Single uniform width) */
+  --border-width: 1px;
+
+  /* Outline Icon Sizes (Two fixed sizes only) */
+  --icon-dense: 16px;         /* Inline / dense table contexts */
+  --icon-ui: 20px;            /* Buttons, navigation, toolbar items */
+
+  /* ------------------------------------------------------------------------
+     4. FORENSIC DARK COLOR PALETTE (Primary & Default)
+     Three distinct charcoal elevation layers (never pure #000)
+     ------------------------------------------------------------------------ */
+  --bg-page: #0B0F17;         /* Deepest charcoal / forensic ground */
+  --bg-card: #121824;         /* Mid charcoal / container cards */
+  --bg-raised: #1A2234;       /* Elevated charcoal / inputs, raised chips, hovers */
+  --bg-overlay: rgba(11, 15, 23, 0.85);
+
+  /* Structural Chrome & Neutrals */
+  --text-primary: #F1F5F9;    /* High-contrast crisp text */
+  --text-secondary: #94A3B8;  /* Neutral slate secondary text */
+  --text-muted: #64748B;      /* De-emphasized metadata text */
+  --text-disabled: #475569;   /* Inactive / disabled text */
+
+  --border-default: #202B3C;  /* Default 1px stroke */
+  --border-hover: #33435C;    /* Hover stroke */
+  --border-focus: #06B6D4;    /* Focus outline stroke (Cyan) */
+
+  --neutral-subtle: #161F2E;  /* Chrome backgrounds */
+  --neutral-disabled: #1E293B;/* Disabled element fill */
+
+  /* Shadows: Strict rule — None in dark mode (use 1px border + layer contrast) */
+  --card-shadow: none;
+
+  /* ------------------------------------------------------------------------
+     5. SEMANTIC STATUS & AI BRANDING COLORS (Dark Mode)
+     Paired with exact 12% opacity tints for badges & pill containers.
+     Never solid saturated fill with white text; use tint + saturated text.
+     ------------------------------------------------------------------------ */
+  /* Confident / Reconstructed (Green family) */
+  --status-high: #10B981;
+  --status-high-tint: rgba(16, 185, 129, 0.12);
+  --status-high-border: rgba(16, 185, 129, 0.28);
+
+  /* Needs Review (Amber family) */
+  --status-medium: #F59E0B;
+  --status-medium-tint: rgba(245, 158, 11, 0.12);
+  --status-medium-border: rgba(245, 158, 11, 0.28);
+
+  /* Unrecoverable / Corrupted (Red family) */
+  --status-low: #EF4444;
+  --status-low-tint: rgba(239, 68, 68, 0.12);
+  --status-low-border: rgba(239, 68, 68, 0.28);
+
+  /* AI / Analysis Branding (Confidence scores, active scans — Cyan/Blue family) */
+  --accent-ai: #06B6D4;
+  --accent-ai-tint: rgba(6, 182, 212, 0.12);
+  --accent-ai-border: rgba(6, 182, 212, 0.28);
+  --accent-ai-glow: rgba(6, 182, 212, 0.20);
+}
+
+/* ==========================================================================
+   LIGHT MODE OVERRIDES ([data-theme="light"])
+   Maintains identical semantic tokens with high-contrast daytime calibration.
+   ========================================================================== */
+[data-theme="light"] {
+  /* Background Hierarchy */
+  --bg-page: #F8FAFC;         /* Light slate page canvas */
+  --bg-card: #FFFFFF;         /* Pure crisp card surface */
+  --bg-raised: #F1F5F9;       /* Subtle raised elevation */
+  --bg-overlay: rgba(248, 250, 252, 0.85);
+
+  /* Structural Chrome & Neutrals */
+  --text-primary: #0F172A;    /* Slate-900 high contrast */
+  --text-secondary: #475569;  /* Slate-600 readable labels */
+  --text-muted: #64748B;      /* Slate-500 secondary metadata */
+  --text-disabled: #94A3B8;   /* Slate-400 disabled */
+
+  --border-default: #E2E8F0;  /* Clean light border */
+  --border-hover: #CBD5E1;    /* Hover border */
+  --border-focus: #0284C7;    /* Focus cyan-blue */
+
+  --neutral-subtle: #F8FAFC;
+  --neutral-disabled: #F1F5F9;
+
+  /* Card Shadow: Soft single token enabled for light mode */
+  --card-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 6px -1px rgba(15, 23, 42, 0.04);
+
+  /* Semantic Status Colors (Tuned for AA/AAA contrast on light backgrounds) */
+  --status-high: #059669;
+  --status-high-tint: rgba(5, 150, 105, 0.12);
+  --status-high-border: rgba(5, 150, 105, 0.24);
+
+  --status-medium: #D97706;
+  --status-medium-tint: rgba(217, 119, 6, 0.12);
+  --status-medium-border: rgba(217, 119, 6, 0.24);
+
+  --status-low: #DC2626;
+  --status-low-tint: rgba(220, 38, 38, 0.12);
+  --status-low-border: rgba(220, 38, 38, 0.24);
+
+  --accent-ai: #0284C7;
+  --accent-ai-tint: rgba(2, 132, 199, 0.12);
+  --accent-ai-border: rgba(2, 132, 199, 0.24);
+  --accent-ai-glow: rgba(2, 132, 199, 0.15);
+}

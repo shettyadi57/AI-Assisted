@@ -1,0 +1,504 @@
+/**
+ * RECONSTRUCT — CORE COMPONENT FOUNDATIONS (Chunk 1/5)
+ * Built exclusively using tokens.css. Zero arbitrary values.
+ */
+
+/* ==========================================================================
+   RESET & BASELINE
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  transition: background-color 0.2s ease, color 0.2s ease;
+  min-height: 100vh;
+}
+
+/* ==========================================================================
+   STRICT TYPOGRAPHY RULES
+   Hard Rule: Monospace exclusively for hashes, IDs, offsets, hex, timestamps, sizes
+   ========================================================================== */
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+.font-mono,
+.forensic-mono,
+.file-hash,
+.block-id,
+.byte-offset,
+.hex-preview,
+.timestamp,
+.file-size {
+  font-family: var(--font-mono) !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Specific Forensic Data Elements */
+.file-hash {
+  word-break: break-all;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.block-id {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-chip);
+  background-color: var(--bg-raised);
+  border: var(--border-width) solid var(--border-default);
+  color: var(--accent-ai);
+}
+
+.byte-offset {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.hex-preview {
+  font-size: var(--text-xs);
+  line-height: var(--leading-relaxed);
+  letter-spacing: 0.05em;
+  background-color: var(--bg-raised);
+  padding: var(--space-8) var(--space-12);
+  border-radius: var(--radius-component);
+  border: var(--border-width) solid var(--border-default);
+  overflow-x: auto;
+}
+
+.timestamp {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.file-size {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+}
+
+/* ==========================================================================
+   12-COLUMN GRID SYSTEM & VERTICAL RHYTHM
+   Desktop: 24px gutters | Tablet: 16px gutters | Mobile: 8px gutters
+   Vertical Rhythm: 16px form | 24px section | 32px region
+   ========================================================================== */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  gap: var(--grid-gutter-desktop);
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .grid-container {
+    gap: var(--grid-gutter-tablet);
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-container {
+    gap: var(--grid-gutter-mobile);
+  }
+}
+
+/* Span utilities for 12 columns */
+.col-span-12 { grid-column: span 12 / span 12; }
+.col-span-8  { grid-column: span 8 / span 8; }
+.col-span-6  { grid-column: span 6 / span 6; }
+.col-span-4  { grid-column: span 4 / span 4; }
+.col-span-3  { grid-column: span 3 / span 3; }
+.col-span-2  { grid-column: span 2 / span 2; }
+.col-span-1  { grid-column: span 1 / span 1; }
+
+@media (max-width: 900px) {
+  .col-span-8, .col-span-6 { grid-column: span 12 / span 12; }
+  .col-span-4, .col-span-3 { grid-column: span 6 / span 6; }
+}
+
+@media (max-width: 640px) {
+  .col-span-4, .col-span-3, .col-span-2, .col-span-1 { grid-column: span 12 / span 12; }
+}
+
+/* Strict Vertical Rhythm Spacing Utilities */
+.rhythm-region {
+  margin-bottom: var(--rhythm-region); /* 32px between major page regions */
+}
+
+.rhythm-section {
+  margin-bottom: var(--rhythm-section); /* 24px between sections */
+}
+
+.rhythm-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rhythm-form); /* 16px between form fields */
+}
+
+/* ==========================================================================
+   CONTAINERS & CARDS
+   Symmetric padding inside containers (24px or 16px)
+   12px border radius, 1px uniform border, dark mode shadow=none
+   ========================================================================== */
+.card {
+  background-color: var(--bg-card);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-card);
+  padding: var(--space-24); /* Symmetric 24px desktop padding */
+  box-shadow: var(--card-shadow);
+  transition: border-color 0.15s ease, background-color 0.2s ease;
+  position: relative;
+}
+
+.card:hover {
+  border-color: var(--border-hover);
+}
+
+.card-dense {
+  padding: var(--space-16); /* Symmetric 16px dense container padding */
+}
+
+.card-raised {
+  background-color: var(--bg-raised);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-16);
+  padding-bottom: var(--space-12);
+  border-bottom: var(--border-width) solid var(--border-default);
+}
+
+.card-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.card-subtitle {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   BUTTONS (Symmetric padding: 8px 16px, 6px radius, 1px border)
+   Icons restricted strictly to 16px and 20px
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  line-height: var(--leading-none);
+  border-radius: var(--radius-component); /* 6px */
+  border: var(--border-width) solid var(--border-default);
+  padding: var(--space-8) var(--space-16); /* Symmetric 8px 16px */
+  cursor: pointer;
+  background-color: var(--bg-raised);
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+  text-decoration: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--border-hover);
+  background-color: var(--neutral-subtle);
+}
+
+.btn:focus-visible {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px var(--accent-ai-glow);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: var(--border-default);
+  background-color: var(--neutral-disabled);
+  color: var(--text-disabled);
+}
+
+/* Dense / Small Button (4px 12px, 16px dense icon) */
+.btn-sm {
+  padding: var(--space-4) var(--space-12);
+  font-size: var(--text-xs);
+  gap: var(--space-4);
+}
+
+/* Button Variants */
+.btn-primary {
+  background-color: var(--accent-ai);
+  border-color: var(--accent-ai);
+  color: #0B0F17; /* High-contrast dark text on cyan */
+  font-weight: var(--font-semibold);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #22D3EE;
+  border-color: #22D3EE;
+}
+
+.btn-secondary {
+  background-color: var(--bg-raised);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+.btn-outline:hover:not(:disabled) {
+  border-color: var(--border-hover);
+  background-color: var(--bg-raised);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: var(--bg-raised);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+.btn-danger {
+  background-color: var(--status-low-tint);
+  border-color: var(--status-low-border);
+  color: var(--status-low);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.20);
+  border-color: var(--status-low);
+}
+
+/* ==========================================================================
+   INPUTS & FORM CONTROLS
+   Symmetric padding (8px 12px), 6px radius, 1px border
+   ========================================================================== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.form-label {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  background-color: var(--bg-raised);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-component); /* 6px */
+  padding: var(--space-8) var(--space-12); /* Symmetric 8px 12px */
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input:hover:not(:disabled) {
+  border-color: var(--border-hover);
+}
+
+.input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px var(--accent-ai-glow);
+}
+
+.input:disabled {
+  opacity: 0.6;
+  background-color: var(--neutral-disabled);
+  border-color: var(--border-default);
+  cursor: not-allowed;
+}
+
+.input-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+/* ==========================================================================
+   SEMANTIC STATUS BADGES & PILLS
+   RULE: Never solid saturated fill with white text;
+   Use 10-15% opacity tint background + saturated text color.
+   Border radius: 6px for standard badges; 4px for small chips.
+   ========================================================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-component); /* 6px */
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-none);
+  border: var(--border-width) solid transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* High Status: Confident / Reconstructed */
+.badge-status-high {
+  background-color: var(--status-high-tint);
+  border-color: var(--status-high-border);
+  color: var(--status-high);
+}
+
+/* Medium Status: Needs Review */
+.badge-status-medium {
+  background-color: var(--status-medium-tint);
+  border-color: var(--status-medium-border);
+  color: var(--status-medium);
+}
+
+/* Low Status: Unrecoverable / Corrupted */
+.badge-status-low {
+  background-color: var(--status-low-tint);
+  border-color: var(--status-low-border);
+  color: var(--status-low);
+}
+
+/* AI / Analysis Accent Badge */
+.badge-accent-ai {
+  background-color: var(--accent-ai-tint);
+  border-color: var(--accent-ai-border);
+  color: var(--accent-ai);
+}
+
+/* Neutral Status Badge */
+.badge-neutral {
+  background-color: var(--bg-raised);
+  border-color: var(--border-default);
+  color: var(--text-secondary);
+}
+
+/* Small Chips (Block tags, flags) - 4px radius */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-chip); /* 4px */
+  font-size: var(--text-xs);
+  border: var(--border-width) solid var(--border-default);
+  background-color: var(--bg-raised);
+  color: var(--text-secondary);
+}
+
+.chip-ai {
+  background-color: var(--accent-ai-tint);
+  border-color: var(--accent-ai-border);
+  color: var(--accent-ai);
+  font-family: var(--font-mono);
+  font-weight: var(--font-semibold);
+}
+
+/* Pulse indicator for live scans */
+.pulse-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+  display: inline-block;
+  animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+/* ==========================================================================
+   OUTLINE ICON TOKENS (Strictly 16px and 20px)
+   ========================================================================== */
+.icon-dense {
+  width: var(--icon-dense);
+  height: var(--icon-dense);
+  stroke-width: 1.75px;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.icon-ui {
+  width: var(--icon-ui);
+  height: var(--icon-ui);
+  stroke-width: 1.75px;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   DATA TABLE BASELINE (Symmetric cell padding)
+   ========================================================================== */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  text-align: left;
+}
+
+.data-table th {
+  padding: var(--space-8) var(--space-12);
+  background-color: var(--bg-raised);
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: var(--border-width) solid var(--border-default);
+}
+
+.data-table td {
+  padding: var(--space-12) var(--space-12); /* Symmetric 12px cell padding */
+  border-bottom: var(--border-width) solid var(--border-default);
+  color: var(--text-primary);
+}
+
+.data-table tr:hover td {
+  background-color: var(--neutral-subtle);
+}
