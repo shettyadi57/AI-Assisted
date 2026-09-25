@@ -112,10 +112,34 @@ class FragmentRecord(BaseModel):
     hex_preview: str = Field(description="First 32 bytes as space-separated uppercase hex")
     flags: list[str] = Field(default_factory=list)
 
-    # Phase 3+ — always null/unknown at this stage
+    # Phase 3 signature detection
     inferred_format: str | None = Field(
         default=None,
-        description="File type — null until Phase 3 signature detection"
+        description="Detected file type (e.g. pdf, jpeg, png, zip)"
+    )
+    role_guess: str = Field(
+        default="UNKNOWN",
+        description="Role classification: FILE_START | CONTINUATION | POSSIBLE_END | UNKNOWN"
+    )
+    signature_confidence: float = Field(
+        default=0.0,
+        description="Signature match confidence [0.0 - 1.0]"
+    )
+    matched_magic_hex: str | None = Field(
+        default=None,
+        description="Hex string of matched magic bytes"
+    )
+    matched_magic_offset: int = Field(
+        default=0,
+        description="Offset within fragment where magic bytes were found"
+    )
+    matched_magic_length: int = Field(
+        default=0,
+        description="Length in bytes of matched magic bytes"
+    )
+    structural_notes: str = Field(
+        default="",
+        description="Structural parser notes and marker details"
     )
     created_at: str
     updated_at: str
@@ -130,9 +154,9 @@ class AnalyzeResponse(BaseModel):
     block_size_used: int
     fragments: list[FragmentRecord]
     disclaimer: str = (
-        "Phase 2 preliminary analysis only. "
-        "Entropy class and content class are heuristics, not forensic conclusions. "
-        "File-type identification scheduled for Phase 3."
+        "Phase 3 Signature Detection active. "
+        "File types and roles identified via byte pattern inspection. "
+        "Portfolio / prototype tool. Not legally admissible."
     )
 
 
@@ -141,3 +165,120 @@ class FragmentListResponse(BaseModel):
     evidence_id: str
     total: int
     fragments: list[FragmentRecord]
+
+
+# ─── Phase 3: Signatures View ───────────────────────────────────────────────
+
+class SignatureDefinitionRecord(BaseModel):
+    """Specification of a known format signature."""
+    format_id: str
+    name: str
+    extension: str
+    category: str
+    magic_hex: str
+    header_offset: int
+    trailer_hex: str | None
+    description: str
+    expected_structural_notes: str
+    typical_entropy_range: list[float]
+    confidence_base: float
+
+
+# ─── Phase 4: Relationship Graph & Edge Linking ──────────────────────────────
+
+class EdgeEvidenceFactorsSchema(BaseModel):
+    signature_match: float
+    offset_continuity: float
+    structural_validity: float
+    entropy_compatibility: float
+    contradiction_count: int
+
+
+class RelationshipScoreRequest(BaseModel):
+    source_fragment_id: str
+    target_fragment_id: str
+    evidence_id: str
+    target_format: str | None = None
+
+
+class RelationshipEdgeSchema(BaseModel):
+    id: str
+    evidence_id: str
+    source_fragment_id: str
+    target_fragment_id: str
+    composite_confidence: float
+    factors: EdgeEvidenceFactorsSchema
+    decision: str
+    decision_rationale: str | None = None
+    evidence_strings: list[str] = Field(default_factory=list)
+
+
+# ─── Phase 5: Candidates & Reassembly ────────────────────────────────────────
+
+class CandidateFragmentItem(BaseModel):
+    fragment_id: str
+    sequence_order: int
+    offset_start: int
+    size_bytes: int
+    sha256_hash: str
+    status: str
+    inferred_format: str | None
+    role_guess: str
+    edge_confidence: float | None = None
+    edge_signals: dict[str, Any] | None = None
+    decision: str = "PENDING"
+    decision_rationale: str | None = None
+
+
+class GapItem(BaseModel):
+    after_sequence_order: int
+    offset_expected: int
+    estimated_size_bytes: int
+    description: str
+    filler_type: str = "zero_fill"
+
+
+class CandidateRecord(BaseModel):
+    id: str
+    name: str
+    target_format: str
+    evidence_id: str | None = None
+    total_size_bytes: int
+    fragment_count: int
+    recovered_fragments: int = 0
+    missing_fragments: int = 0
+    duplicate_fragments: int = 0
+    corrupted_fragments: int = 0
+    reconstructed_bytes: int = 0
+    missing_bytes: int = 0
+    coverage_pct: float = 0.0
+    composite_confidence: float = 0.0
+    status: str
+    recovery_status: str = "PENDING"
+    reconstruction_sha256: str | None = None
+    artifact_path: str | None = None
+    is_finalized: bool = False
+    evidence_strings: list[str] = Field(default_factory=list)
+    gaps: list[GapItem] = Field(default_factory=list)
+    fragments: list[CandidateFragmentItem] = Field(default_factory=list)
+    created_at: str
+    updated_at: str
+
+
+class CandidateListResponse(BaseModel):
+    total: int
+    candidates: list[CandidateRecord]
+
+
+class GenerateCandidatesRequest(BaseModel):
+    evidence_id: str
+    target_format: str | None = None
+
+
+class EdgeDecisionRequest(BaseModel):
+    decision: str = Field(..., description="ACCEPTED or REJECTED")
+    rationale: str | None = None
+
+
+class ReassembleRequest(BaseModel):
+    filler_type: str = Field(default="zero_fill", description="zero_fill or omit")

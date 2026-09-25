@@ -30,6 +30,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Iterable
 
+from core.signature_registry import default_signature_registry, FragmentRole
+
 
 # ─── Forensic status enum (6 non-negotiable states) ──────────────────────────
 
@@ -86,8 +88,14 @@ class FragmentMetadata:
     hex_preview: str          # First 32 bytes as "AA BB CC …" uppercase hex
     flags: list[str] = field(default_factory=list)
 
-    # Phase 3+ fields — always None/unknown at this stage
+    # Phase 3 signature detection fields
     inferred_format: str | None = None
+    role_guess: str = "UNKNOWN"
+    signature_confidence: float = 0.0
+    matched_magic_hex: str | None = None
+    matched_magic_offset: int = 0
+    matched_magic_length: int = 0
+    structural_notes: str = ""
 
 
 # ─── Default constants ────────────────────────────────────────────────────────
@@ -225,13 +233,34 @@ class FragmentAnalyzer:
         flags: list[str] = []
 
         # Duplicate detection
+        is_dup = False
         if seen_hashes is not None:
             if sha256 in seen_hashes:
-                status = ForensicStatus.DUPLICATE
+                is_dup = True
                 flags.append(f"DUPLICATE_OF:{seen_hashes[sha256]}")
             else:
                 seen_hashes[sha256] = fid
-                status = ForensicStatus.UNCERTAIN
+
+        # Phase 3: Real signature & structural marker scanning
+        sig_res = default_signature_registry.scan_fragment(raw_bytes, entropy=entropy)
+        inferred_format = sig_res.format_id
+        role_guess = sig_res.role.value
+        sig_conf = sig_res.confidence
+        matched_magic_hex = sig_res.matched_magic_hex
+        matched_magic_offset = sig_res.matched_magic_offset
+        matched_magic_length = sig_res.matched_magic_length
+        structural_notes = sig_res.structural_notes
+
+        # Determine forensic status adhering to 6 non-negotiable states
+        if sig_res.is_corrupted:
+            status = ForensicStatus.CORRUPTED
+            flags.append(f"CORRUPTED:{sig_res.corruption_reason or 'Structural anomaly'}")
+        elif is_dup:
+            status = ForensicStatus.DUPLICATE
+        elif role_guess == FragmentRole.FILE_START.value:
+            status = ForensicStatus.CONFIRMED
+        elif inferred_format is not None and role_guess in (FragmentRole.CONTINUATION.value, FragmentRole.POSSIBLE_END.value):
+            status = ForensicStatus.INFERRED
         else:
             status = ForensicStatus.UNCERTAIN
 
@@ -248,7 +277,13 @@ class FragmentAnalyzer:
             content_class=_content_class(raw_bytes),
             hex_preview=_hex_preview(raw_bytes),
             flags=flags,
-            inferred_format=None,  # Phase 3
+            inferred_format=inferred_format,
+            role_guess=role_guess,
+            signature_confidence=sig_conf,
+            matched_magic_hex=matched_magic_hex,
+            matched_magic_offset=matched_magic_offset,
+            matched_magic_length=matched_magic_length,
+            structural_notes=structural_notes,
         )
 
     # ── Blob splitting ─────────────────────────────────────────────────────

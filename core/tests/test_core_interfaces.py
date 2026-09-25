@@ -69,19 +69,39 @@ def test_integrity_analyzer_interface_raises():
         analyzer.hash_file("nonexistent.raw")
 
 
-def test_signature_registry_interface_raises():
-    """Verify SignatureRegistry raises NotImplementedError."""
+def test_signature_registry_phase3_live():
+    """Verify SignatureRegistry correctly identifies signatures and scans fragments."""
     registry = SignatureRegistry()
     assert isinstance(registry, SignatureRegistryInterface)
-    with pytest.raises(NotImplementedError):
-        registry.get_signature("jpeg")
-    with pytest.raises(NotImplementedError):
-        registry.scan_for_signatures(b"\xFF\xD8\xFF")
+    
+    # 1. Supported formats
+    fmts = registry.list_supported_formats()
+    assert "pdf" in fmts and "jpeg" in fmts and "png" in fmts and "zip" in fmts
+    
+    # 2. Signature lookup
+    sig = registry.get_signature("pdf")
+    assert sig is not None
+    assert sig.header_magic == b"%PDF-"
+    assert sig.trailer_magic == b"%%EOF"
+
+    # 3. Header match
+    assert registry.match_header(b"%PDF-1.4 header", "pdf") == 1.0
+    assert registry.match_header(b"\xFF\xD8\xFF\xE0", "jpeg") == 1.0
+    assert registry.match_header(b"random bytes", "pdf") == 0.0
+
+    # 4. Trailer match
+    assert registry.match_trailer(b"trailer content %%EOF\n", "pdf") == 1.0
+
+    # 5. Scan fragment
+    res = registry.scan_fragment(b"%PDF-1.4\n1 0 obj\n")
+    assert res.format_id == "pdf"
+    assert res.role.value == "FILE_START"
+    assert res.confidence >= 0.85
 
 
 def test_fragment_analyzer_phase2_live():
     """
-    Phase 2: FragmentAnalyzer is now fully implemented.
+    Phase 2 & 3: FragmentAnalyzer is now fully implemented.
     Verify real entropy computation, block splitting, and duplicate detection.
     """
     from core.fragment_analyzer import DEFAULT_BLOCK_SIZE
@@ -104,7 +124,6 @@ def test_fragment_analyzer_phase2_live():
     assert meta.size_bytes == len(b"Hello world!\n" * 40)
     assert meta.entropy > 0.0
     assert meta.content_class == "PRINTABLE"
-    assert meta.status == ForensicStatus.UNCERTAIN
 
     # ── Blob splitting ─────────────────────────────────────────────────────
     blob = b"A" * 1024 + b"B" * 1024 + b"C" * 512
@@ -117,10 +136,9 @@ def test_fragment_analyzer_phase2_live():
     # ── Duplicate detection ────────────────────────────────────────────────
     dup_blob = b"X" * 512 + b"X" * 512 + b"Y" * 512
     dup_frags = list(analyzer.analyze_blob(dup_blob, ev_id + "-dup"))
-    assert dup_frags[0].status == ForensicStatus.UNCERTAIN
+    assert dup_frags[0].status != ForensicStatus.DUPLICATE
     assert dup_frags[1].status == ForensicStatus.DUPLICATE
     assert any("DUPLICATE_OF:" in flag for flag in dup_frags[1].flags)
-    assert dup_frags[2].status == ForensicStatus.UNCERTAIN
 
     # ── Boundary detection ────────────────────────────────────────────────
     import os
@@ -135,8 +153,8 @@ def test_fragment_analyzer_phase2_live():
     assert custom.block_size == 8192
 
 
-def test_relationship_engine_interface_raises():
-    """Verify RelationshipEngine raises NotImplementedError."""
+def test_relationship_engine_phase4_live():
+    """Verify RelationshipEngine scores relationships and builds chains."""
     engine = RelationshipEngine()
     assert isinstance(engine, RelationshipEngineInterface)
     factors = EdgeEvidenceFactors(
@@ -146,16 +164,19 @@ def test_relationship_engine_interface_raises():
         entropy_compatibility=1.0,
         contradiction_count=0,
     )
-    with pytest.raises(NotImplementedError):
-        engine.compute_composite_score(factors)
+    score = engine.compute_composite_score(factors)
+    assert score == 1.0
 
 
-def test_reconstruction_engine_interface_raises():
-    """Verify ReconstructionEngine raises NotImplementedError."""
+def test_reconstruction_engine_phase5_live():
+    """Verify ReconstructionEngine assembles candidates and generates provenance."""
     engine = ReconstructionEngine()
     assert isinstance(engine, ReconstructionEngineInterface)
-    with pytest.raises(NotImplementedError):
-        engine.assemble_candidate("cand-1", "jpeg", [], "frag-0")
+    cand = engine.assemble_candidate("cand-1", "pdf", [], "frag-0")
+    assert cand.candidate_id == "cand-1"
+    assert cand.ordered_fragment_ids == ["frag-0"]
+    raw = engine.synthesize_file(cand, {"frag-0": b"%PDF-1.4 valid content"})
+    assert raw.startswith(b"%PDF-1.4")
 
 
 def test_validators_raise():

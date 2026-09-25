@@ -28,8 +28,10 @@ from backend.schemas import (
     FragmentListResponse,
     FragmentRecord,
     PhaseNotImplementedResponse,
+    SignatureDefinitionRecord,
 )
 from core.fragment_analyzer import FragmentAnalyzer, FragmentMetadata, ForensicStatus
+from core.signature_registry import BUILTIN_SIGNATURES, default_signature_registry
 
 logger = logging.getLogger("reconstruct.analysis")
 router = APIRouter(prefix="/analysis", tags=["Pipeline Stage: Analysis"])
@@ -52,12 +54,20 @@ def _meta_to_record(m: FragmentMetadata, created_at: str, updated_at: str) -> Fr
         hex_preview=m.hex_preview,
         flags=m.flags,
         inferred_format=m.inferred_format,
+        role_guess=m.role_guess,
+        signature_confidence=m.signature_confidence,
+        matched_magic_hex=m.matched_magic_hex,
+        matched_magic_offset=m.matched_magic_offset,
+        matched_magic_length=m.matched_magic_length,
+        structural_notes=m.structural_notes,
         created_at=created_at,
         updated_at=updated_at,
     )
 
 
 def _row_to_record(row) -> FragmentRecord:
+    # Safe column access for backwards compatibility
+    keys = row.keys() if hasattr(row, "keys") else []
     return FragmentRecord(
         id=row["id"],
         evidence_id=row["evidence_id"],
@@ -72,6 +82,12 @@ def _row_to_record(row) -> FragmentRecord:
         hex_preview=row["hex_preview"] or "",
         flags=json.loads(row["flags_json"] or "[]"),
         inferred_format=row["inferred_format"],
+        role_guess=row["role_guess"] if "role_guess" in keys and row["role_guess"] else "UNKNOWN",
+        signature_confidence=row["signature_confidence"] if "signature_confidence" in keys and row["signature_confidence"] else 0.0,
+        matched_magic_hex=row["matched_magic_hex"] if "matched_magic_hex" in keys else None,
+        matched_magic_offset=row["matched_magic_offset"] if "matched_magic_offset" in keys and row["matched_magic_offset"] is not None else 0,
+        matched_magic_length=row["matched_magic_length"] if "matched_magic_length" in keys and row["matched_magic_length"] is not None else 0,
+        structural_notes=row["structural_notes"] if "structural_notes" in keys and row["structural_notes"] else "",
         created_at=row["created_at"],
         updated_at=row["updated_at"],
     )
@@ -187,8 +203,10 @@ async def analyze_fragments(req: AnalyzeRequest = Body(...)) -> AnalyzeResponse:
                        (id, evidence_id, offset_start, offset_end, size_bytes,
                         sha256_hash, entropy, status, inferred_format,
                         hex_preview, entropy_class, content_class, flags_json,
+                        role_guess, signature_confidence, matched_magic_hex,
+                        matched_magic_offset, matched_magic_length, structural_notes,
                         created_at, updated_at)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     (
                         meta.fragment_id,
                         meta.evidence_id,
@@ -203,6 +221,12 @@ async def analyze_fragments(req: AnalyzeRequest = Body(...)) -> AnalyzeResponse:
                         meta.entropy_class,
                         meta.content_class,
                         json.dumps(meta.flags),
+                        meta.role_guess,
+                        meta.signature_confidence,
+                        meta.matched_magic_hex,
+                        meta.matched_magic_offset,
+                        meta.matched_magic_length,
+                        meta.structural_notes,
                         now,
                         now,
                     ),
@@ -354,6 +378,7 @@ async def get_fragment_hex(
             "ascii": ascii_part,
         })
 
+    keys = frag_row.keys() if hasattr(frag_row, "keys") else []
     return {
         "fragment_id": fragment_id,
         "evidence_filename": frag_row["ev_filename"],
@@ -362,4 +387,38 @@ async def get_fragment_hex(
         "bytes_returned": len(raw),
         "truncated": len(raw) < size,
         "rows": rows,
+        "inferred_format": frag_row["inferred_format"] if "inferred_format" in keys else None,
+        "role_guess": frag_row["role_guess"] if "role_guess" in keys else "UNKNOWN",
+        "signature_confidence": frag_row["signature_confidence"] if "signature_confidence" in keys else 0.0,
+        "matched_magic_hex": frag_row["matched_magic_hex"] if "matched_magic_hex" in keys else None,
+        "matched_magic_offset": frag_row["matched_magic_offset"] if "matched_magic_offset" in keys else 0,
+        "matched_magic_length": frag_row["matched_magic_length"] if "matched_magic_length" in keys else 0,
+        "structural_notes": frag_row["structural_notes"] if "structural_notes" in keys else "",
     }
+
+
+# ─── GET /signatures — list supported signatures ─────────────────────────────
+
+@router.get(
+    "/signatures",
+    response_model=list[SignatureDefinitionRecord],
+    summary="List all supported file format signature definitions",
+)
+async def list_signatures() -> list[SignatureDefinitionRecord]:
+    """Return all registered format signatures and expected structural specifications."""
+    return [
+        SignatureDefinitionRecord(
+            format_id=sig.format_id,
+            name=sig.name,
+            extension=sig.extension,
+            category=sig.category.value,
+            magic_hex=sig.header_magic.hex().upper(),
+            header_offset=sig.header_offset,
+            trailer_hex=sig.trailer_magic.hex().upper() if sig.trailer_magic else None,
+            description=sig.description,
+            expected_structural_notes=sig.expected_structural_notes,
+            typical_entropy_range=list(sig.typical_entropy_range),
+            confidence_base=sig.confidence_base,
+        )
+        for sig in BUILTIN_SIGNATURES
+    ]
