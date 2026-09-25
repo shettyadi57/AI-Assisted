@@ -79,14 +79,60 @@ def test_signature_registry_interface_raises():
         registry.scan_for_signatures(b"\xFF\xD8\xFF")
 
 
-def test_fragment_analyzer_interface_raises():
-    """Verify FragmentAnalyzer raises NotImplementedError."""
-    analyzer = FragmentAnalyzer()
-    assert isinstance(analyzer, FragmentAnalyzerInterface)
-    with pytest.raises(NotImplementedError):
-        analyzer.calculate_entropy(b"\x00" * 256)
-    with pytest.raises(NotImplementedError):
-        analyzer.detect_boundaries(b"\x00" * 512)
+def test_fragment_analyzer_phase2_live():
+    """
+    Phase 2: FragmentAnalyzer is now fully implemented.
+    Verify real entropy computation, block splitting, and duplicate detection.
+    """
+    from core.fragment_analyzer import DEFAULT_BLOCK_SIZE
+
+    analyzer = FragmentAnalyzer(block_size=512)
+
+    # ── Entropy calculation ────────────────────────────────────────────────
+    zeros = b"\x00" * 512
+    profile_zero = analyzer.calculate_entropy(zeros)
+    assert profile_zero.overall_entropy == 0.0
+
+    uniform = bytes(range(256)) * 2
+    profile_max = analyzer.calculate_entropy(uniform)
+    assert profile_max.overall_entropy == pytest.approx(8.0, abs=0.01)
+
+    # ── Single fragment analysis ───────────────────────────────────────────
+    ev_id = "test-ev-0000-0000-0000-000000000001"
+    meta = analyzer.analyze_fragment(b"Hello world!\n" * 40, ev_id, offset_start=0)
+    assert meta.evidence_id == ev_id
+    assert meta.size_bytes == len(b"Hello world!\n" * 40)
+    assert meta.entropy > 0.0
+    assert meta.content_class == "PRINTABLE"
+    assert meta.status == ForensicStatus.UNCERTAIN
+
+    # ── Blob splitting ─────────────────────────────────────────────────────
+    blob = b"A" * 1024 + b"B" * 1024 + b"C" * 512
+    frags = list(analyzer.analyze_blob(blob, ev_id))
+    assert len(frags) == 5
+    assert frags[0].offset_start == 0
+    assert frags[1].offset_start == 512
+    assert frags[-1].size_bytes == 512
+
+    # ── Duplicate detection ────────────────────────────────────────────────
+    dup_blob = b"X" * 512 + b"X" * 512 + b"Y" * 512
+    dup_frags = list(analyzer.analyze_blob(dup_blob, ev_id + "-dup"))
+    assert dup_frags[0].status == ForensicStatus.UNCERTAIN
+    assert dup_frags[1].status == ForensicStatus.DUPLICATE
+    assert any("DUPLICATE_OF:" in flag for flag in dup_frags[1].flags)
+    assert dup_frags[2].status == ForensicStatus.UNCERTAIN
+
+    # ── Boundary detection ────────────────────────────────────────────────
+    import os
+    combined = os.urandom(512) + b"\x00" * 512
+    boundaries = analyzer.detect_boundaries(combined, sector_size=512)
+    assert len(boundaries) >= 1
+    assert boundaries[0].boundary_type == "ENTROPY_JUMP"
+
+    # ── Block size is configurable (not hardcoded) ────────────────────────
+    assert DEFAULT_BLOCK_SIZE == 4096
+    custom = FragmentAnalyzer(block_size=8192)
+    assert custom.block_size == 8192
 
 
 def test_relationship_engine_interface_raises():

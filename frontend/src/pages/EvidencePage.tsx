@@ -53,9 +53,13 @@ interface IngestStatus {
 }
 
 interface DiscoveryStatus {
-  state: 'not_started' | 'probing' | 'deferred' | 'error';
+  state: 'not_started' | 'probing' | 'done' | 'deferred' | 'error';
   phase?: string;
   detail?: string;
+  // Phase 2 real results
+  fragmentCount?: number;
+  duplicateCount?: number;
+  blockSize?: number;
 }
 
 // ─── Source type config ───────────────────────────────────────────────────────
@@ -267,9 +271,10 @@ const DiscoveryStatusPanel: React.FC<{ status: DiscoveryStatus; evidenceName?: s
   if (status.state === 'not_started') return null;
 
   const colors = {
-    probing: { border: '#06B6D4', bg: 'rgba(6,182,212,0.06)', text: '#67E8F9' },
-    deferred: { border: '#38BDF8', bg: 'rgba(56,189,248,0.06)', text: '#7DD3FC' },
-    error: { border: '#EF4444', bg: 'rgba(239,68,68,0.06)', text: '#FCA5A5' },
+    probing:  { border: '#06B6D4', bg: 'rgba(6,182,212,0.06)',   text: '#67E8F9' },
+    done:     { border: '#10B981', bg: 'rgba(16,185,129,0.06)',   text: '#34D399' },
+    deferred: { border: '#38BDF8', bg: 'rgba(56,189,248,0.06)',   text: '#7DD3FC' },
+    error:    { border: '#EF4444', bg: 'rgba(239,68,68,0.06)',    text: '#FCA5A5' },
   }[status.state] ?? { border: '#64748B', bg: 'rgba(100,116,139,0.06)', text: '#94A3B8' };
 
   return (
@@ -281,13 +286,14 @@ const DiscoveryStatusPanel: React.FC<{ status: DiscoveryStatus; evidenceName?: s
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-3)' }}>
         <span style={{ fontSize: '20px' }}>
-          {status.state === 'probing' ? '🔍' : status.state === 'deferred' ? '⏳' : '⚠️'}
+          {status.state === 'probing' ? '🔍' : status.state === 'done' ? '✅' : status.state === 'deferred' ? '⏳' : '⚠️'}
         </span>
         <div>
           <div style={{ fontWeight: 600, color: colors.text, fontSize: 'var(--text-base)' }}>
-            {status.state === 'probing' && 'Contacting discovery endpoint…'}
+            {status.state === 'probing' && 'Running Phase 2 fragment analysis…'}
+            {status.state === 'done' && `Fragment discovery complete — ${status.fragmentCount} fragments found`}
             {status.state === 'deferred' && 'Coming in Phase 2 — Fragment Discovery'}
-            {status.state === 'error' && 'Discovery Endpoint Error'}
+            {status.state === 'error' && 'Discovery Error'}
           </div>
           {evidenceName && (
             <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -296,6 +302,32 @@ const DiscoveryStatusPanel: React.FC<{ status: DiscoveryStatus; evidenceName?: s
           )}
         </div>
       </div>
+
+      {/* Phase 2 done: show real results */}
+      {status.state === 'done' && (
+        <div style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap', alignItems: 'center' }}>
+          {[
+            { label: 'Total Fragments', value: status.fragmentCount ?? 0, color: '#06B6D4' },
+            { label: 'Duplicates', value: status.duplicateCount ?? 0, color: '#F59E0B' },
+            { label: 'Block Size', value: `${status.blockSize ?? 4096} B`, color: '#94A3B8' },
+            { label: 'Unique', value: (status.fragmentCount ?? 0) - (status.duplicateCount ?? 0), color: '#10B981' },
+          ].map(({ label, value, color }) => (
+            <div key={label} style={{ background: 'var(--bg-page)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', padding: 'var(--space-2) var(--space-4)', textAlign: 'center' }}>
+              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '2px' }}>{label}</div>
+              <div className="font-mono" style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color }}>{value}</div>
+            </div>
+          ))}
+          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+            →{' '}
+            <button
+              onClick={() => {/* use setCurrentPage from outer */}}
+              style={{ background: 'none', border: 'none', color: '#38BDF8', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}
+            >
+              View in Fragments page
+            </button>
+          </div>
+        </div>
+      )}
 
       {status.state === 'deferred' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
@@ -467,30 +499,38 @@ export const EvidencePage: React.FC = () => {
     } catch { /* swallow */ }
   };
 
-  // ── Probe the fragment discovery endpoint ──────────────────────────────────
+  // ── Run Phase 2 fragment discovery ────────────────────────────────────────
   const handleDiscover = async (record: EvidenceRecord) => {
     setDiscoveryTarget(record);
     setDiscoveryStatus({ state: 'probing' });
     try {
-      const res = await fetch('/api/v1/analysis/fragments', { method: 'POST' });
+      const res = await fetch('/api/v1/analysis/fragments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ evidence_id: record.id, block_size: 4096 }),
+      });
       const data = await res.json();
-      if (res.status === 501) {
+      if (res.ok) {
+        setDiscoveryStatus({
+          state: 'done',
+          fragmentCount: data.fragment_count,
+          duplicateCount: data.duplicate_count,
+          blockSize: data.block_size_used,
+        });
+        // Refresh evidence list so status shows PROCESSED
+        await loadEvidenceList();
+      } else if (res.status === 501) {
         setDiscoveryStatus({
           state: 'deferred',
-          phase: data.phase ?? 'Phase 2 — Fragment Discovery',
-          detail: data.detail ?? 'Fragment analysis not yet implemented.',
+          phase: data.phase ?? 'Phase 2',
+          detail: data.detail ?? 'Not yet implemented.',
         });
       } else {
-        setDiscoveryStatus({ state: 'error', detail: `Unexpected ${res.status}` });
+        throw new Error(data.detail ?? `HTTP ${res.status}`);
       }
     } catch (err: any) {
-      setDiscoveryStatus({
-        state: 'deferred',
-        phase: 'Phase 2 — Fragment Discovery',
-        detail: 'Backend fragment endpoint not yet implemented. Phase 2 will implement real fragment discovery.',
-      });
+      setDiscoveryStatus({ state: 'error', detail: err.message });
     }
-    // Auto-navigate hint: scroll page into view
     setTimeout(() => {
       document.getElementById('discovery-status')?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
