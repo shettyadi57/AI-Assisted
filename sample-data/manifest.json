@@ -1,40 +1,325 @@
 {
-  "dataset": "Synthetic JPEG Fragment Cluster",
-  "version": "1.0.0",
-  "sector_size": 512,
-  "target_format": "jpeg",
-  "fragments": [
-    {
-      "filename": "fragment_001_jpeg_header.bin",
-      "size_bytes": 512,
-      "sha256": "a91e0f2b803a06e2ce3f3ba43a95cf0e54a60dae7db9c9a3a590883d37b76d01"
+  "seed": 42,
+  "block_size": 4096,
+  "note": "GROUND TRUTH \u2014 FOR TESTING ONLY. Never surface to the investigator UI as if discovered. Manifesting this to the UI would be fabricating results.",
+  "files": {
+    "pdf_contiguous": {
+      "file": "pdf\\pdf_contiguous.bin",
+      "size": 16970,
+      "sha256": "6821496b1bb069e909a8238564e5ab0a223775491ca880126715cef1b940959c",
+      "type": "pdf",
+      "role": "contiguous"
     },
-    {
-      "filename": "fragment_002_jpeg_entropy.bin",
-      "size_bytes": 512,
-      "sha256": "5c72a922b79683f1949e4fc8773340e2f7ae38e57cdb897953d73d8ce9eee5d0"
+    "pdf_fragments": {
+      "type": "pdf",
+      "source": "pdf_contiguous",
+      "sequence_order": [
+        "pdf\\pdf_frag_01.bin",
+        "pdf\\pdf_frag_02.bin",
+        "pdf\\pdf_frag_03.bin",
+        "pdf\\pdf_frag_04.bin",
+        "pdf\\pdf_frag_05.bin"
+      ],
+      "fragments": [
+        {
+          "file": "pdf\\pdf_frag_01.bin",
+          "size": 4096,
+          "sha256": "8cd37ad18cc914864cb91dfc2a38141a8c5679105f43daac396536e4010c2078",
+          "fragment_index": 1,
+          "offset_in_original": 0,
+          "flags": []
+        },
+        {
+          "file": "pdf\\pdf_frag_02.bin",
+          "size": 4096,
+          "sha256": "951a8a83bf67430773d2e5a4e2790deb39ba497128a6686366c227471914aff6",
+          "fragment_index": 2,
+          "offset_in_original": 4096,
+          "flags": []
+        },
+        {
+          "file": "pdf\\pdf_frag_03.bin",
+          "size": 4096,
+          "sha256": "f38c7a75b781c7a82ab2267952453a099013097e352bbe99616092d4275d6221",
+          "fragment_index": 3,
+          "offset_in_original": 8192,
+          "flags": []
+        },
+        {
+          "file": "pdf\\pdf_frag_04.bin",
+          "size": 4096,
+          "sha256": "71dee8c2da444a79e7dcc75a6281a5fec4ebd05e225e09fcdcf404bba828a18f",
+          "fragment_index": 4,
+          "offset_in_original": 12288,
+          "flags": []
+        },
+        {
+          "file": "pdf\\pdf_frag_05.bin",
+          "size": 4096,
+          "sha256": "237eceaa0d303b1895a4feac4170cd821e3f4d2893ce6690d32494d142e3258b",
+          "fragment_index": 5,
+          "offset_in_original": 16384,
+          "flags": []
+        }
+      ]
     },
-    {
-      "filename": "fragment_003_jpeg_eoi.bin",
-      "size_bytes": 512,
-      "sha256": "801481fab3b72a3838d68ba71dc65caf62fd2c5bd1ec29e434bc0b41ff056738"
+    "jpeg_fragments": {
+      "type": "jpeg",
+      "source_bytes": "175c7fcc5120e13a07c6011483de7e993f16df8068059b4cdf8fb7a2395ff57e",
+      "sequence_order": [
+        "jpeg\\jpeg_frag_01.bin",
+        "jpeg\\jpeg_frag_02.bin",
+        "jpeg\\jpeg_frag_03.bin",
+        "jpeg\\jpeg_frag_04.bin"
+      ],
+      "fragments": [
+        {
+          "file": "jpeg\\jpeg_frag_01.bin",
+          "size": 4096,
+          "sha256": "0588ab69f37160d73042911a69d0ee7fc4e301dcb94f07a08d8000cab626951a",
+          "fragment_index": 1,
+          "offset_in_original": 0,
+          "flags": []
+        },
+        {
+          "file": "jpeg\\jpeg_frag_02.bin",
+          "size": 4096,
+          "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+          "fragment_index": 2,
+          "offset_in_original": 4096,
+          "flags": []
+        },
+        {
+          "file": "jpeg\\jpeg_frag_03.bin",
+          "size": 4096,
+          "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+          "fragment_index": 3,
+          "offset_in_original": 8192,
+          "flags": []
+        },
+        {
+          "file": "jpeg\\jpeg_frag_04.bin",
+          "size": 4096,
+          "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+          "fragment_index": 4,
+          "offset_in_original": 12288,
+          "flags": []
+        }
+      ],
+      "duplicates": [
+        {
+          "file": "jpeg\\jpeg_frag_03_dup.bin",
+          "size": 4096,
+          "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+          "duplicate_of": "jpeg\\jpeg_frag_03.bin",
+          "flags": [
+            "DUPLICATE"
+          ]
+        }
+      ]
     },
-    {
-      "filename": "fragment_004_corrupted_slack.bin",
-      "size_bytes": 512,
-      "sha256": "07d56701645ce1c09abca1f6808e5aa029db93d8d6a2bd82b045fe0d4ce485d8"
+    "png_fragments": {
+      "type": "png",
+      "source_bytes": "85d0d856eaa0525a0fc74d4f5db49b4e74230df3ced209e8f7c280af715083a8",
+      "sequence_order": [
+        "png\\png_frag_01.bin",
+        "png\\png_frag_02.bin",
+        "png\\png_frag_03.bin",
+        "png\\png_frag_04.bin"
+      ],
+      "fragments": [
+        {
+          "file": "png\\png_frag_01.bin",
+          "size": 4096,
+          "sha256": "c25662412b301fe9fd56891451e21103d5a3ca3afdb3afd71985cf680773480c",
+          "fragment_index": 1,
+          "offset_in_original": 0,
+          "flags": []
+        },
+        {
+          "file": "png\\png_frag_02.bin",
+          "size": 4096,
+          "sha256": "f47a8ec3e9aff2318d896942282ad4fe37d6391c82914f54a5da8a37de1300c6",
+          "fragment_index": 2,
+          "offset_in_original": 4096,
+          "flags": [
+            "CORRUPTED"
+          ]
+        },
+        {
+          "file": "png\\png_frag_03.bin",
+          "size": 4096,
+          "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+          "fragment_index": 3,
+          "offset_in_original": 8192,
+          "flags": []
+        },
+        {
+          "file": "png\\png_frag_04.bin",
+          "size": 4096,
+          "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+          "fragment_index": 4,
+          "offset_in_original": 12288,
+          "flags": []
+        }
+      ]
+    },
+    "zip_fragments": {
+      "type": "zip",
+      "source_bytes": "f56ed34ad82749212740974cabda11c7aa895a9c9dd9515458aa28bdc216ad39",
+      "sequence_order": [
+        "zip_\\zip_frag_01.bin",
+        "zip_\\zip_frag_02.bin",
+        "zip_/zip_frag_03.bin",
+        "zip_\\zip_frag_04.bin"
+      ],
+      "fragments": [
+        {
+          "file": "zip_\\zip_frag_01.bin",
+          "size": 4096,
+          "sha256": "58573072e2f509b4342d7bacc704452a46d3564a7acb9695a96f5c335b625332",
+          "fragment_index": 1,
+          "offset_in_original": 0,
+          "flags": []
+        },
+        {
+          "file": "zip_\\zip_frag_02.bin",
+          "size": 4096,
+          "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+          "fragment_index": 2,
+          "offset_in_original": 4096,
+          "flags": []
+        },
+        {
+          "file": "zip_/zip_frag_03.bin",
+          "size": 4096,
+          "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+          "fragment_index": 3,
+          "offset_in_original": 8192,
+          "flags": [
+            "MISSING"
+          ]
+        },
+        {
+          "file": "zip_\\zip_frag_04.bin",
+          "size": 4096,
+          "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+          "fragment_index": 4,
+          "offset_in_original": 12288,
+          "flags": []
+        }
+      ],
+      "note": "Fragment 3 (zip_frag_03.bin) intentionally absent \u2014 simulates a disk gap."
     }
-  ],
-  "ground_truth_edges": [
-    {
-      "source": "fragment_001_jpeg_header.bin",
-      "target": "fragment_002_jpeg_entropy.bin",
-      "confidence": 0.95
-    },
-    {
-      "source": "fragment_002_jpeg_entropy.bin",
-      "target": "fragment_003_jpeg_eoi.bin",
-      "confidence": 0.91
-    }
-  ]
+  },
+  "loose_fragment_soup": {
+    "file": "loose-fragment-soup.bin",
+    "size": 69632,
+    "sha256": "f11bdd8854e8b83639fb70b141e49fd51c596a18ddb2348a81c6600de940060e",
+    "description": "All fragment files concatenated in randomised order (seed=42). Simulates fragments pulled off a disk image with no directory structure. Primary test input for the full pipeline.",
+    "soup_order": [
+      {
+        "source_file": "jpeg\\jpeg_frag_03.bin",
+        "soup_offset": 0,
+        "size": 4096,
+        "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7"
+      },
+      {
+        "source_file": "png\\png_frag_02.bin",
+        "soup_offset": 4096,
+        "size": 4096,
+        "sha256": "f47a8ec3e9aff2318d896942282ad4fe37d6391c82914f54a5da8a37de1300c6"
+      },
+      {
+        "source_file": "jpeg\\jpeg_frag_01.bin",
+        "soup_offset": 8192,
+        "size": 4096,
+        "sha256": "0588ab69f37160d73042911a69d0ee7fc4e301dcb94f07a08d8000cab626951a"
+      },
+      {
+        "source_file": "jpeg\\jpeg_frag_02.bin",
+        "soup_offset": 12288,
+        "size": 4096,
+        "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7"
+      },
+      {
+        "source_file": "zip_\\zip_frag_04.bin",
+        "soup_offset": 16384,
+        "size": 4096,
+        "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7"
+      },
+      {
+        "source_file": "zip_\\zip_frag_02.bin",
+        "soup_offset": 20480,
+        "size": 4096,
+        "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7"
+      },
+      {
+        "source_file": "zip_\\zip_frag_01.bin",
+        "soup_offset": 24576,
+        "size": 4096,
+        "sha256": "58573072e2f509b4342d7bacc704452a46d3564a7acb9695a96f5c335b625332"
+      },
+      {
+        "source_file": "png\\png_frag_01.bin",
+        "soup_offset": 28672,
+        "size": 4096,
+        "sha256": "c25662412b301fe9fd56891451e21103d5a3ca3afdb3afd71985cf680773480c"
+      },
+      {
+        "source_file": "jpeg\\jpeg_frag_04.bin",
+        "soup_offset": 32768,
+        "size": 4096,
+        "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7"
+      },
+      {
+        "source_file": "pdf\\pdf_frag_02.bin",
+        "soup_offset": 36864,
+        "size": 4096,
+        "sha256": "951a8a83bf67430773d2e5a4e2790deb39ba497128a6686366c227471914aff6"
+      },
+      {
+        "source_file": "pdf\\pdf_frag_03.bin",
+        "soup_offset": 40960,
+        "size": 4096,
+        "sha256": "f38c7a75b781c7a82ab2267952453a099013097e352bbe99616092d4275d6221"
+      },
+      {
+        "source_file": "png\\png_frag_04.bin",
+        "soup_offset": 45056,
+        "size": 4096,
+        "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7"
+      },
+      {
+        "source_file": "jpeg\\jpeg_frag_03_dup.bin",
+        "soup_offset": 49152,
+        "size": 4096,
+        "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7"
+      },
+      {
+        "source_file": "pdf\\pdf_frag_05.bin",
+        "soup_offset": 53248,
+        "size": 4096,
+        "sha256": "237eceaa0d303b1895a4feac4170cd821e3f4d2893ce6690d32494d142e3258b"
+      },
+      {
+        "source_file": "png\\png_frag_03.bin",
+        "soup_offset": 57344,
+        "size": 4096,
+        "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7"
+      },
+      {
+        "source_file": "pdf\\pdf_frag_01.bin",
+        "soup_offset": 61440,
+        "size": 4096,
+        "sha256": "8cd37ad18cc914864cb91dfc2a38141a8c5679105f43daac396536e4010c2078"
+      },
+      {
+        "source_file": "pdf\\pdf_frag_04.bin",
+        "soup_offset": 65536,
+        "size": 4096,
+        "sha256": "71dee8c2da444a79e7dcc75a6281a5fec4ebd05e225e09fcdcf404bba828a18f"
+      }
+    ]
+  }
 }
