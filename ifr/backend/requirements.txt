@@ -1,0 +1,32 @@
+# Intelligent Fragment Reconstruction — Backend Dependencies
+# Phase 0: Scaffolding
+# Pin major versions; minor/patch can float in dev.
+
+# Web framework
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+
+# Database (SQLite ORM)
+sqlalchemy==2.0.30
+aiosqlite==0.20.0            # async SQLite driver for SQLAlchemy async sessions
+
+# Validation / serialization
+pydantic==2.7.1
+pydantic-settings==2.3.0     # settings from env / .env file
+
+# File I/O & hashing (stdlib hashlib used; python-magic for MIME sniffing)
+python-magic==0.4.27         # libmagic bindings for format detection
+python-multipart==0.0.9      # multipart form uploads (evidence ingest)
+
+# Logging
+structlog==24.1.0
+
+# Testing
+pytest==8.2.1
+pytest-asyncio==0.23.7
+httpx==0.27.0                # async test client for FastAPI
+
+# Dev utilities
+black==24.4.2
+isort==5.13.2
+mypy==1.10.0

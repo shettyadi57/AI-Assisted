@@ -1,5 +1,5 @@
 /**
- * RECONSTRUCT — CORE COMPONENT FOUNDATIONS (Chunk 1/5)
+ * RECONSTRUCT — AURORA GLASS COMPONENT FOUNDATIONS (Chunk 1/5)
  * Built exclusively using tokens.css. Zero arbitrary values.
  */
 
@@ -25,13 +25,148 @@ body {
   font-family: var(--font-sans);
   font-size: var(--text-base);
   line-height: var(--leading-normal);
-  transition: background-color 0.2s ease, color 0.2s ease;
   min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Universal Accessible Focus-Visible Ring */
+:focus-visible {
+  outline: 2px solid var(--border-focus) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px var(--accent-ai-glow) !important;
 }
 
 /* ==========================================================================
-   STRICT TYPOGRAPHY RULES
-   Hard Rule: Monospace exclusively for hashes, IDs, offsets, hex, timestamps, sizes
+   2. AMBIENT BACKGROUND & DRIFTING AURORA MESH
+   Rendered once, fixed behind the whole app. Not per-screen.
+   ========================================================================== */
+.ambient-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background-color: var(--bg-page);
+}
+
+/* Three softly blurred gradient orbs in off-canvas corners */
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.85;
+  will-change: transform;
+}
+
+/* Orb 1: Cyan orb top-right */
+.ambient-orb-1 {
+  width: 550px;
+  height: 550px;
+  top: -150px;
+  right: -100px;
+  background: radial-gradient(circle, var(--orb-cyan) 0%, transparent 70%);
+  animation: drift-orb-1 75s cubic-bezier(0.4, 0, 0.6, 1) infinite alternate;
+}
+
+/* Orb 2: Violet orb bottom-left */
+.ambient-orb-2 {
+  width: 600px;
+  height: 600px;
+  bottom: -200px;
+  left: -150px;
+  background: radial-gradient(circle, var(--orb-violet) 0%, transparent 70%);
+  animation: drift-orb-2 85s cubic-bezier(0.4, 0, 0.6, 1) infinite alternate;
+}
+
+/* Orb 3: Deep Indigo subtle accent mid-screen corner */
+.ambient-orb-3 {
+  width: 450px;
+  height: 450px;
+  top: 45%;
+  right: -120px;
+  background: radial-gradient(circle, var(--orb-indigo) 0%, transparent 75%);
+  animation: drift-orb-3 65s cubic-bezier(0.4, 0, 0.6, 1) infinite alternate;
+}
+
+@keyframes drift-orb-1 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(-60px, 80px) scale(1.12); }
+  100% { transform: translate(-120px, 40px) scale(0.95); }
+}
+
+@keyframes drift-orb-2 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(80px, -70px) scale(1.08); }
+  100% { transform: translate(140px, -30px) scale(0.92); }
+}
+
+@keyframes drift-orb-3 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(-50px, -60px) scale(1.15); }
+  100% { transform: translate(-90px, 50px) scale(1); }
+}
+
+/* Accessibility: Stop drift animations under prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .ambient-orb,
+  .ambient-orb-1,
+  .ambient-orb-2,
+  .ambient-orb-3 {
+    animation: none !important;
+  }
+}
+
+/* ==========================================================================
+   3. SINGLE GLASS SURFACE SYSTEM (Defined exactly once)
+   background: rgba(18, 24, 36, 0.55)
+   backdrop-filter: blur(20px) saturate(160%)
+   border: 1px solid rgba(255, 255, 255, 0.08)
+   top inner highlight: box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12)
+   ========================================================================== */
+.card,
+.glass-surface {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--border-width) solid var(--glass-border-color);
+  box-shadow: var(--glass-highlight), var(--card-shadow);
+  border-radius: var(--radius-card); /* 12px for cards */
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+}
+
+.glass-surface:hover {
+  border-color: var(--glass-border-hover);
+}
+
+/* Solid Fallback for environments lacking backdrop-filter */
+@supports not ((backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px))) {
+  .glass-surface {
+    background: var(--surface-fallback) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+}
+
+/* Simulated fallback toggle class for interactive verification */
+.force-solid-fallback .glass-surface,
+.force-solid-fallback.glass-surface {
+  background: var(--surface-fallback) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* Glass Raised Surface (For nested controls, inputs, dropdowns) */
+.glass-raised {
+  background: var(--glass-bg-raised);
+  border-color: var(--glass-border-color);
+}
+
+/* ==========================================================================
+   4. TYPOGRAPHY RULES & GRADIENT HEADINGS
+   Hard Rule: Monospace for technical values ONLY.
+   Inter for UI chrome, labels, prose.
    ========================================================================== */
 .font-sans {
   font-family: var(--font-sans);
@@ -44,13 +179,22 @@ body {
 .byte-offset,
 .hex-preview,
 .timestamp,
-.file-size {
+.file-size,
+.block-counter {
   font-family: var(--font-mono) !important;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
 }
 
-/* Specific Forensic Data Elements */
+/* Subtle Gradient Text for 1-2 headline moments max */
+.text-gradient-brand {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+/* Forensic Data Utilities */
 .file-hash {
   word-break: break-all;
   font-size: var(--text-xs);
@@ -61,11 +205,11 @@ body {
   display: inline-flex;
   align-items: center;
   font-size: var(--text-xs);
-  font-weight: var(--font-medium);
+  font-weight: var(--font-semibold);
   padding: var(--space-4) var(--space-8);
-  border-radius: var(--radius-chip);
-  background-color: var(--bg-raised);
-  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-chip); /* 4px */
+  background: var(--glass-bg-raised);
+  border: var(--border-width) solid var(--glass-border-color);
   color: var(--accent-ai);
 }
 
@@ -78,10 +222,10 @@ body {
   font-size: var(--text-xs);
   line-height: var(--leading-relaxed);
   letter-spacing: 0.05em;
-  background-color: var(--bg-raised);
+  background: var(--glass-bg-raised);
   padding: var(--space-8) var(--space-12);
   border-radius: var(--radius-component);
-  border: var(--border-width) solid var(--border-default);
+  border: var(--border-width) solid var(--glass-border-color);
   overflow-x: auto;
 }
 
@@ -97,9 +241,8 @@ body {
 }
 
 /* ==========================================================================
-   12-COLUMN GRID SYSTEM & VERTICAL RHYTHM
-   Desktop: 24px gutters | Tablet: 16px gutters | Mobile: 8px gutters
-   Vertical Rhythm: 16px form | 24px section | 32px region
+   5. 12-COLUMN GRID & VERTICAL RHYTHM
+   4px modular base scale: 4, 8, 12, 16, 24, 32, 48, 64px
    ========================================================================== */
 .grid-container {
   display: grid;
@@ -120,7 +263,6 @@ body {
   }
 }
 
-/* Span utilities for 12 columns */
 .col-span-12 { grid-column: span 12 / span 12; }
 .col-span-8  { grid-column: span 8 / span 8; }
 .col-span-6  { grid-column: span 6 / span 6; }
@@ -138,9 +280,8 @@ body {
   .col-span-4, .col-span-3, .col-span-2, .col-span-1 { grid-column: span 12 / span 12; }
 }
 
-/* Strict Vertical Rhythm Spacing Utilities */
 .rhythm-region {
-  margin-bottom: var(--rhythm-region); /* 32px between major page regions */
+  margin-bottom: var(--rhythm-region); /* 32px between major regions */
 }
 
 .rhythm-section {
@@ -154,58 +295,8 @@ body {
 }
 
 /* ==========================================================================
-   CONTAINERS & CARDS
-   Symmetric padding inside containers (24px or 16px)
-   12px border radius, 1px uniform border, dark mode shadow=none
-   ========================================================================== */
-.card {
-  background-color: var(--bg-card);
-  border: var(--border-width) solid var(--border-default);
-  border-radius: var(--radius-card);
-  padding: var(--space-24); /* Symmetric 24px desktop padding */
-  box-shadow: var(--card-shadow);
-  transition: border-color 0.15s ease, background-color 0.2s ease;
-  position: relative;
-}
-
-.card:hover {
-  border-color: var(--border-hover);
-}
-
-.card-dense {
-  padding: var(--space-16); /* Symmetric 16px dense container padding */
-}
-
-.card-raised {
-  background-color: var(--bg-raised);
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-16);
-  padding-bottom: var(--space-12);
-  border-bottom: var(--border-width) solid var(--border-default);
-}
-
-.card-title {
-  font-size: var(--text-lg);
-  font-weight: var(--font-semibold);
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-}
-
-.card-subtitle {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
-}
-
-/* ==========================================================================
-   BUTTONS (Symmetric padding: 8px 16px, 6px radius, 1px border)
-   Icons restricted strictly to 16px and 20px
+   6. BUTTONS & GRADIENT BORDER SYSTEM
+   Double-background trick for cyan->violet gradient borders
    ========================================================================== */
 .btn {
   display: inline-flex;
@@ -217,87 +308,90 @@ body {
   font-weight: var(--font-medium);
   line-height: var(--leading-none);
   border-radius: var(--radius-component); /* 6px */
-  border: var(--border-width) solid var(--border-default);
+  border: var(--border-width) solid var(--glass-border-color);
   padding: var(--space-8) var(--space-16); /* Symmetric 8px 16px */
   cursor: pointer;
-  background-color: var(--bg-raised);
+  background-color: var(--glass-bg-raised);
   color: var(--text-primary);
   transition: all 0.15s ease;
   text-decoration: none;
   user-select: none;
   white-space: nowrap;
+  min-height: 36px;
 }
 
 .btn:hover:not(:disabled) {
-  border-color: var(--border-hover);
-  background-color: var(--neutral-subtle);
+  border-color: var(--glass-border-hover);
+  background-color: rgba(34, 46, 70, 0.75);
 }
 
 .btn:active:not(:disabled) {
   transform: scale(0.98);
-  background-color: var(--bg-card);
-}
-
-.btn:focus-visible {
-  outline: 2px solid var(--border-focus) !important;
-  outline-offset: 2px !important;
-  box-shadow: 0 0 0 3px var(--accent-ai-glow) !important;
 }
 
 .btn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
-  border-color: var(--border-default);
+  border-color: var(--glass-border-color);
   background-color: var(--neutral-disabled);
   color: var(--text-disabled);
 }
 
-/* Dense / Small Button (4px 12px, 16px dense icon) */
-.btn-sm {
-  padding: var(--space-4) var(--space-12);
-  font-size: var(--text-xs);
-  gap: var(--space-4);
+/* Gradient-Border Treatment (Single implementation method for CTAs & active nav) */
+.btn-gradient-border {
+  border: 1px solid transparent;
+  background: linear-gradient(rgba(26, 34, 52, 0.85), rgba(26, 34, 52, 0.85)) padding-box,
+              linear-gradient(135deg, var(--accent-ai) 0%, var(--accent-violet) 100%) border-box;
+  color: var(--text-primary);
+  font-weight: var(--font-semibold);
+  box-shadow: var(--accent-ai-glow-subtle);
 }
 
-/* Button Variants */
+.btn-gradient-border:hover:not(:disabled) {
+  background: linear-gradient(rgba(34, 46, 70, 0.95), rgba(34, 46, 70, 0.95)) padding-box,
+              linear-gradient(135deg, #22D3EE 0%, #A78BFA 100%) border-box;
+  box-shadow: var(--accent-ai-glow);
+}
+
 .btn-primary {
   background-color: var(--accent-ai);
   border-color: var(--accent-ai);
-  color: #0B0F17; /* High-contrast dark text on cyan */
+  color: #0A0E14;
   font-weight: var(--font-semibold);
 }
 
 .btn-primary:hover:not(:disabled) {
   background-color: #22D3EE;
   border-color: #22D3EE;
+  box-shadow: var(--accent-ai-glow);
 }
 
 .btn-secondary {
-  background-color: var(--bg-raised);
-  border-color: var(--border-default);
+  background: var(--glass-bg-raised);
+  border-color: var(--glass-border-color);
   color: var(--text-primary);
 }
 
 .btn-outline {
-  background-color: transparent;
-  border-color: var(--border-default);
+  background: transparent;
+  border-color: var(--glass-border-color);
   color: var(--text-primary);
 }
 
 .btn-outline:hover:not(:disabled) {
-  border-color: var(--border-hover);
-  background-color: var(--bg-raised);
+  border-color: var(--glass-border-hover);
+  background: var(--glass-bg-raised);
 }
 
 .btn-ghost {
-  background-color: transparent;
+  background: transparent;
   border-color: transparent;
   color: var(--text-secondary);
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background-color: var(--bg-raised);
-  border-color: var(--border-default);
+  background: var(--glass-bg-raised);
+  border-color: var(--glass-border-color);
   color: var(--text-primary);
 }
 
@@ -308,67 +402,15 @@ body {
 }
 
 .btn-danger:hover:not(:disabled) {
-  background-color: rgba(239, 68, 68, 0.20);
+  background-color: rgba(239, 68, 68, 0.22);
   border-color: var(--status-low);
+  box-shadow: var(--status-low-glow-subtle);
 }
 
 /* ==========================================================================
-   INPUTS & FORM CONTROLS
-   Symmetric padding (8px 12px), 6px radius, 1px border
-   ========================================================================== */
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.form-label {
-  font-size: var(--text-xs);
-  font-weight: var(--font-medium);
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.input {
-  width: 100%;
-  font-family: var(--font-sans);
-  font-size: var(--text-sm);
-  background-color: var(--bg-raised);
-  border: var(--border-width) solid var(--border-default);
-  border-radius: var(--radius-component); /* 6px */
-  padding: var(--space-8) var(--space-12); /* Symmetric 8px 12px */
-  color: var(--text-primary);
-  outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.input:hover:not(:disabled) {
-  border-color: var(--border-hover);
-}
-
-.input:focus {
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 2px var(--accent-ai-glow);
-}
-
-.input:disabled {
-  opacity: 0.6;
-  background-color: var(--neutral-disabled);
-  border-color: var(--border-default);
-  cursor: not-allowed;
-}
-
-.input-mono {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-}
-
-/* ==========================================================================
-   SEMANTIC STATUS BADGES & PILLS
-   RULE: Never solid saturated fill with white text;
-   Use 10-15% opacity tint background + saturated text color.
-   Border radius: 6px for standard badges; 4px for small chips.
+   7. SEMANTIC STATUS BADGES + GLOW SYSTEM
+   Badges use 12% tint background + full-strength text
+   Optional .badge-glow applies 0 0 16px -4px glow token
    ========================================================================== */
 .badge {
   display: inline-flex;
@@ -383,6 +425,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   white-space: nowrap;
+  transition: box-shadow 0.15s ease;
 }
 
 /* High Status: Confident / Reconstructed */
@@ -392,11 +435,19 @@ body {
   color: var(--status-high);
 }
 
+.badge-status-high.badge-glow {
+  box-shadow: var(--status-high-glow);
+}
+
 /* Medium Status: Needs Review */
 .badge-status-medium {
   background-color: var(--status-medium-tint);
   border-color: var(--status-medium-border);
   color: var(--status-medium);
+}
+
+.badge-status-medium.badge-glow {
+  box-shadow: var(--status-medium-glow);
 }
 
 /* Low Status: Unrecoverable / Corrupted */
@@ -406,6 +457,10 @@ body {
   color: var(--status-low);
 }
 
+.badge-status-low.badge-glow {
+  box-shadow: var(--status-low-glow);
+}
+
 /* AI / Analysis Accent Badge */
 .badge-accent-ai {
   background-color: var(--accent-ai-tint);
@@ -413,14 +468,17 @@ body {
   color: var(--accent-ai);
 }
 
-/* Neutral Status Badge */
+.badge-accent-ai.badge-glow {
+  box-shadow: var(--accent-ai-glow);
+}
+
 .badge-neutral {
-  background-color: var(--bg-raised);
-  border-color: var(--border-default);
+  background-color: var(--glass-bg-raised);
+  border-color: var(--glass-border-color);
   color: var(--text-secondary);
 }
 
-/* Small Chips (Block tags, flags) - 4px radius */
+/* Small Chips (Block tags, flags) — 4px radius */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -428,36 +486,29 @@ body {
   padding: var(--space-4) var(--space-8);
   border-radius: var(--radius-chip); /* 4px */
   font-size: var(--text-xs);
-  border: var(--border-width) solid var(--border-default);
-  background-color: var(--bg-raised);
+  border: var(--border-width) solid var(--glass-border-color);
+  background-color: var(--glass-bg-raised);
   color: var(--text-secondary);
 }
 
-.chip-ai {
-  background-color: var(--accent-ai-tint);
-  border-color: var(--accent-ai-border);
-  color: var(--accent-ai);
-  font-family: var(--font-mono);
-  font-weight: var(--font-semibold);
-}
-
-/* Pulse indicator for live scans */
+/* Pulse indicator with subtle aura */
 .pulse-indicator {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background-color: currentColor;
   display: inline-block;
+  box-shadow: 0 0 8px currentColor;
   animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @keyframes pulse-glow {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.85); }
+  50% { opacity: 0.35; transform: scale(0.85); }
 }
 
 /* ==========================================================================
-   OUTLINE ICON TOKENS (Strictly 16px and 20px)
+   8. OUTLINE ICONS & GLOW
    ========================================================================== */
 .icon-dense {
   width: var(--icon-dense);
@@ -477,33 +528,56 @@ body {
   flex-shrink: 0;
 }
 
-/* ==========================================================================
-   DATA TABLE BASELINE (Symmetric cell padding)
-   ========================================================================== */
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--text-sm);
-  text-align: left;
+.icon-glow-high {
+  filter: drop-shadow(0 0 4px var(--status-high));
 }
 
-.data-table th {
-  padding: var(--space-8) var(--space-12);
-  background-color: var(--bg-raised);
-  color: var(--text-secondary);
+.icon-glow-ai {
+  filter: drop-shadow(0 0 4px var(--accent-ai));
+}
+
+/* ==========================================================================
+   9. FORM CONTROLS IN GLASS HUD
+   ========================================================================== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.form-label {
   font-size: var(--text-xs);
-  font-weight: var(--font-semibold);
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: var(--border-width) solid var(--border-default);
 }
 
-.data-table td {
-  padding: var(--space-12) var(--space-12); /* Symmetric 12px cell padding */
-  border-bottom: var(--border-width) solid var(--border-default);
+.input {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  background-color: var(--glass-bg-raised);
+  border: var(--border-width) solid var(--glass-border-color);
+  border-radius: var(--radius-component); /* 6px */
+  padding: var(--space-8) var(--space-12);
   color: var(--text-primary);
+  outline: none;
+  transition: all 0.15s ease;
 }
 
-.data-table tr:hover td {
-  background-color: var(--neutral-subtle);
+.input:hover:not(:disabled) {
+  border-color: var(--glass-border-hover);
+}
+
+.input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px var(--accent-ai-glow);
+}
+
+.input:disabled {
+  opacity: 0.5;
+  background-color: var(--neutral-disabled);
+  border-color: var(--glass-border-color);
+  cursor: not-allowed;
 }

@@ -20,8 +20,11 @@
    ========================================================================== */
 .topbar {
   height: var(--space-64); /* Exact 64px fixed height */
-  background-color: var(--bg-card);
-  border-bottom: var(--border-width) solid var(--border-default);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: var(--border-width) solid var(--glass-border-color);
+  box-shadow: var(--glass-highlight), var(--card-shadow);
   display: flex;
   align-items: center; /* Shared vertical-center axis */
   justify-content: space-between;
@@ -29,7 +32,6 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: var(--card-shadow);
 }
 
 .topbar-left {
@@ -144,8 +146,11 @@
 /* Left Sidebar (240px, collapsible to 64px icon-only) */
 .sidebar {
   width: 240px; /* 60 * 4px */
-  background-color: var(--bg-card);
-  border-right: var(--border-width) solid var(--border-default);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-right: var(--border-width) solid var(--glass-border-color);
+  box-shadow: var(--glass-highlight);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -349,22 +354,24 @@
 }
 
 .stat-card {
-  background-color: var(--bg-card);
-  border: var(--border-width) solid var(--border-default);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--border-width) solid var(--glass-border-color);
   border-radius: var(--radius-card); /* 12px */
   padding: var(--space-24); /* Symmetric 24px padding on all 4 cards */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: var(--space-16);
-  box-shadow: var(--card-shadow);
-  transition: border-color 0.15s ease, background-color 0.2s ease;
+  box-shadow: var(--glass-highlight), var(--card-shadow);
+  transition: border-color 0.15s ease, background 0.15s ease;
   position: relative;
   overflow: hidden;
 }
 
 .stat-card:hover {
-  border-color: var(--border-hover);
+  border-color: var(--glass-border-hover);
 }
 
 /* Stat card top colored accent indicator strip */
@@ -573,11 +580,13 @@
    - Action: Center-aligned
    ========================================================================== */
 .table-container {
-  background-color: var(--bg-card);
-  border: var(--border-width) solid var(--border-default);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--border-width) solid var(--glass-border-color);
   border-radius: var(--radius-card); /* 12px */
   overflow: hidden;
-  box-shadow: var(--card-shadow);
+  box-shadow: var(--glass-highlight), var(--card-shadow);
 }
 
 .triage-table {

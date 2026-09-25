@@ -11,6 +11,51 @@
 
 ---
 
+## 🔬 Technical Differentiation
+
+### Prior Art & Shared Limitation
+
+| Tool | Approach | Limitation |
+|------|----------|------------|
+| **Scalpel** | Header/footer signature carving | Finds fragments; cannot explain *why* they were ordered or assess ordering confidence |
+| **PhotoRec** | Broad-format batch carving | Produces outputs, not reasoning — no fragment relationship transparency |
+| **bulk_extractor** | Byte-level feature scanning | Surface-level feature tagging; no structural validation of fragment sequences |
+
+**Shared blind spot:** None of these tools expose *reconstruction reasoning* — why fragments were ordered a certain way, what the confidence is and why, or let a human investigator accept or reject a specific fragment relationship before the file is finalized. They are **batch tools, not investigation workbenches.**
+
+---
+
+### Our Approach
+
+Reconstruct treats fragment ordering as a **scored graph-construction problem** with transparent, inspectable evidence per edge:
+
+```
+Fragment A ──[edge: 0.91]──► Fragment B ──[edge: 0.74]──► Fragment C
+             │                             │
+             ├─ Signature match: ✓          ├─ Signature match: ✓
+             ├─ Offset continuity: ✓        ├─ Offset continuity: ~
+             ├─ Structural validity: ✓      ├─ Structural validity: ✓
+             └─ Entropy profile: ✓          └─ Entropy profile: ✗
+```
+
+Every candidate relationship between fragments is **scored on four independent axes** of evidence, surfaced to the investigator as readable factors (not a black-box percentage), and the investigator can **accept or reject individual fragment-to-fragment edges** before the file is finalized — preserving the ability to reconstruct the why, not just the what.
+
+**Full provenance is maintained:** every output byte traces back to its source fragment, every edge traces back to its evidence scores, and every investigator decision is logged in an immutable audit trail.
+
+---
+
+### Technical Difference (Summary)
+
+| Dimension | Batch Tools (Scalpel / PhotoRec) | Reconstruct |
+|-----------|----------------------------------|-------------|
+| **Fragment ordering model** | Heuristic / format-signature-driven | Candidate relationship scoring (graph edges with multi-factor evidence) |
+| **Confidence communication** | None, or opaque single percentage | Decomposed per-factor evidence: signature match, offset continuity, structural validity, entropy |
+| **Investigator control** | None — batch accept-all | Accept / reject individual fragment relationships before file finalization |
+| **Audit trail** | None | Full provenance: output byte → source fragment → edge evidence → investigator decision |
+| **Workflow model** | Automated pipeline, inspect output | **Human-in-the-loop investigation workbench** |
+
+---
+
 ## 📐 Chunk-by-Chunk Implementation
 
 ### Chunk 1: Role, Project Context & Design System (`tokens.css`, `components.css`, `showcase.html`)

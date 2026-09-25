@@ -1,24 +1,21 @@
 /**
- * RECONSTRUCT — FORENSIC DESIGN SYSTEM TOKENS (Chunk 1/5)
- * Security & Digital Forensics Dashboard
+ * RECONSTRUCT — AURORA GLASS FORENSIC HUD DESIGN TOKENS (Chunk 1/5)
+ * Security & Digital Forensics Specification
  * 
- * Strict Guidelines:
- * - 4px modular spacing scale (4, 8, 12, 16, 24, 32, 48, 64) — zero arbitrary px
- * - 12-column responsive grid (24px desktop, 16px tablet, 8px mobile gutters)
- * - Vertical rhythm: 16px form fields, 24px sections, 32px regions
- * - Forensic Dark as primary theme with 3 distinct charcoal elevation steps
- * - Dual typography: Sans-serif for UI labels/prose; Monospace for technical data ONLY
- * - Semantic status colors paired with 10-15% opacity background tints
- * - Standardized component tokens: 1px borders, fixed radii (4px, 6px, 12px), 16px/20px icons
+ * Aesthetic Architecture:
+ * - Base page near-black #0A0E14 with fixed drifting ambient cyan & violet orbs
+ * - Single .glass-surface standard: rgba(18,24,36,0.55), blur(20px) saturate(160%), inset 0 1px 0 top highlight
+ * - Fallback solid surface for unsupported backdrop-filter: #101622
+ * - Strict 4px modular spacing scale: 4, 8, 12, 16, 24, 32, 48, 64px
+ * - Dual typography: Inter UI sans vs JetBrains Mono technical data
+ * - Semantic status tokens with 3 derived values: 12% tint, full-color text/border, and 16px -4px glow
+ * - Reusable gradient border token (cyan -> violet) for primary CTAs and active nav
  */
 
-/* ==========================================================================
-   ROOT: DEFAULT FORENSIC DARK THEME
-   ========================================================================== */
 :root {
-  /* ------------------------------------------------------------------------
-     1. SPACING SYSTEM (4px modular base unit — NO arbitrary px values)
-     ------------------------------------------------------------------------ */
+  /* ========================================================================
+     1. SPACING & GRID SYSTEM (Strict 4px modular base unit — NO arbitrary px)
+     ======================================================================== */
   --space-4: 4px;
   --space-8: 8px;
   --space-12: 12px;
@@ -28,26 +25,63 @@
   --space-48: 48px;
   --space-64: 64px;
 
-  /* Strict Vertical Rhythm Tokens */
+  /* Strict Vertical Rhythm */
   --rhythm-form: var(--space-16);    /* 16px between form fields */
   --rhythm-section: var(--space-24); /* 24px between sections */
   --rhythm-region: var(--space-32);  /* 32px between major page regions */
 
-  /* 12-Column Grid System */
+  /* 12-Column Responsive Layout Grid */
   --grid-columns: 12;
   --grid-gutter-desktop: var(--space-24); /* 24px desktop gutter */
   --grid-gutter-tablet: var(--space-16);  /* 16px tablet gutter */
   --grid-gutter-mobile: var(--space-8);   /* 8px mobile gutter */
 
-  /* ------------------------------------------------------------------------
-     2. TYPOGRAPHY SYSTEM
-     Hard Rule: Monospace for hashes, block IDs, byte offsets, hex previews,
-     timestamps, file sizes. Sans-serif for all UI labels, nav, and prose.
-     ------------------------------------------------------------------------ */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Roboto Mono', 'SF Mono', Consolas, 'Courier New', monospace;
+  /* ========================================================================
+     2. AMBIENT BACKGROUND & AURORA MESH
+     ======================================================================== */
+  --bg-page: #0A0E14;              /* Near-black deep forensic ground */
+  --surface-fallback: #101622;     /* Solid fallback when backdrop-filter is unsupported */
 
-  /* Font Sizes */
+  /* Ambient Gradient Orb Colors */
+  --accent-ai: #06B6D4;            /* Primary AI Cyan */
+  --accent-violet: #8B5CF6;        /* Secondary Aurora Violet */
+  --orb-cyan: rgba(6, 182, 212, 0.18);
+  --orb-violet: rgba(139, 92, 246, 0.16);
+  --orb-indigo: rgba(79, 70, 229, 0.12);
+
+  /* Gradient Text Token (Used on 1-2 headline moments max, never on body/tables) */
+  --gradient-brand: linear-gradient(135deg, #06B6D4 0%, #8B5CF6 100%);
+
+  /* ========================================================================
+     3. GLASS SURFACE SYSTEM (The core visual token, defined exactly once)
+     ======================================================================== */
+  --glass-bg: rgba(18, 24, 36, 0.55);
+  --glass-bg-raised: rgba(26, 34, 52, 0.65);
+  --glass-bg-subtle: rgba(14, 19, 29, 0.45);
+  --glass-blur: blur(20px) saturate(160%);
+  --glass-border-color: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(255, 255, 255, 0.18);
+  --glass-border-focus: rgba(6, 182, 212, 0.75);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.12); /* Subtle light-catching top edge */
+
+  /* Card and Panel Dimensions */
+  --radius-card: 12px;
+  --radius-component: 6px;
+  --radius-chip: 4px;
+  --border-width: 1px;
+
+  /* Standard Card Shadow in Glass Mode */
+  --card-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.50);
+
+  /* ========================================================================
+     4. TYPOGRAPHY SYSTEM
+     Hard Rule: Monospace exclusively for hashes, IDs, offsets, hex, timestamps, sizes
+     Inter for UI chrome, labels, prose, and navigation
+     ======================================================================== */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Roboto Mono', 'SF Mono', Consolas, monospace;
+
+  /* Scale */
   --text-xs: 12px;
   --text-sm: 14px;
   --text-base: 16px;
@@ -68,115 +102,60 @@
   --font-semibold: 600;
   --font-bold: 700;
 
-  /* ------------------------------------------------------------------------
-     3. COMPONENT TOKENS
-     ------------------------------------------------------------------------ */
-  /* Border Radii */
-  --radius-chip: 4px;         /* Small chips, block-ID tags */
-  --radius-component: 6px;    /* Buttons, inputs, badges */
-  --radius-card: 12px;        /* Cards, panels, modal dialogs */
+  /* Foreground Text Colors (Guaranteed >= 4.5:1 contrast against glass surfaces) */
+  --text-primary: #F1F5F9;         /* 95% brightness, crisp forensic legibility */
+  --text-secondary: #94A3B8;       /* Slate-400 high contrast */
+  --text-muted: #64748B;           /* Slate-500 secondary metadata */
+  --text-disabled: #475569;        /* Slate-600 disabled */
 
-  /* Border Width (Single uniform width) */
-  --border-width: 1px;
+  /* Chrome Neutrals */
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.18);
+  --border-focus: #06B6D4;
+  --neutral-subtle: rgba(255, 255, 255, 0.04);
+  --neutral-disabled: rgba(30, 41, 59, 0.50);
 
-  /* Outline Icon Sizes (Two fixed sizes only) */
-  --icon-dense: 16px;         /* Inline / dense table contexts */
-  --icon-ui: 20px;            /* Buttons, navigation, toolbar items */
+  /* Outline Icon Tokens (Strictly 16px and 20px) */
+  --icon-dense: 16px;              /* Dense / inline table contexts */
+  --icon-ui: 20px;                 /* Buttons / navigation / headers */
 
-  /* ------------------------------------------------------------------------
-     4. FORENSIC DARK COLOR PALETTE (Primary & Default)
-     Three distinct charcoal elevation layers (never pure #000)
-     ------------------------------------------------------------------------ */
-  --bg-page: #0B0F17;         /* Deepest charcoal / forensic ground */
-  --bg-card: #121824;         /* Mid charcoal / container cards */
-  --bg-raised: #1A2234;       /* Elevated charcoal / inputs, raised chips, hovers */
-  --bg-overlay: rgba(11, 15, 23, 0.85);
+  /* ========================================================================
+     5. SEMANTIC STATUS + GLOW SYSTEM
+     Each token features THREE derived values:
+     a) 12% opacity background tint (badge fills)
+     b) full-strength color (badge text / icons / borders)
+     c) 0 0 16px -4px glow token at ~50% opacity (used sparingly on key items)
+     ======================================================================== */
 
-  /* Structural Chrome & Neutrals */
-  --text-primary: #F1F5F9;    /* High-contrast crisp text */
-  --text-secondary: #94A3B8;  /* Neutral slate secondary text */
-  --text-muted: #64748B;      /* De-emphasized metadata text */
-  --text-disabled: #475569;   /* Inactive / disabled text */
-
-  --border-default: #202B3C;  /* Default 1px stroke */
-  --border-hover: #33435C;    /* Hover stroke */
-  --border-focus: #06B6D4;    /* Focus outline stroke (Cyan) */
-
-  --neutral-subtle: #161F2E;  /* Chrome backgrounds */
-  --neutral-disabled: #1E293B;/* Disabled element fill */
-
-  /* Shadows: Strict rule — None in dark mode (use 1px border + layer contrast) */
-  --card-shadow: none;
-
-  /* ------------------------------------------------------------------------
-     5. SEMANTIC STATUS & AI BRANDING COLORS (Dark Mode)
-     Paired with exact 12% opacity tints for badges & pill containers.
-     Never solid saturated fill with white text; use tint + saturated text.
-     ------------------------------------------------------------------------ */
-  /* Confident / Reconstructed (Green family) */
+  /* High Status: Confident / Reconstructed (Emerald) */
   --status-high: #10B981;
   --status-high-tint: rgba(16, 185, 129, 0.12);
   --status-high-border: rgba(16, 185, 129, 0.28);
+  --status-high-glow: 0 0 16px -4px rgba(16, 185, 129, 0.50);
+  --status-high-glow-subtle: 0 0 8px -2px rgba(16, 185, 129, 0.25);
 
-  /* Needs Review (Amber family) */
+  /* Medium Status: Needs Review (Amber) */
   --status-medium: #F59E0B;
   --status-medium-tint: rgba(245, 158, 11, 0.12);
   --status-medium-border: rgba(245, 158, 11, 0.28);
+  --status-medium-glow: 0 0 16px -4px rgba(245, 158, 11, 0.50);
+  --status-medium-glow-subtle: 0 0 8px -2px rgba(245, 158, 11, 0.25);
 
-  /* Unrecoverable / Corrupted (Red family) */
+  /* Low Status: Unrecoverable / Corrupted (Crimson) */
   --status-low: #EF4444;
   --status-low-tint: rgba(239, 68, 68, 0.12);
   --status-low-border: rgba(239, 68, 68, 0.28);
+  --status-low-glow: 0 0 16px -4px rgba(239, 68, 68, 0.50);
+  --status-low-glow-subtle: 0 0 8px -2px rgba(239, 68, 68, 0.25);
 
-  /* AI / Analysis Branding (Confidence scores, active scans — Cyan/Blue family) */
-  --accent-ai: #06B6D4;
+  /* AI Analysis / Active Scan Branding (Cyan) */
   --accent-ai-tint: rgba(6, 182, 212, 0.12);
   --accent-ai-border: rgba(6, 182, 212, 0.28);
-  --accent-ai-glow: rgba(6, 182, 212, 0.20);
-}
+  --accent-ai-glow: 0 0 16px -4px rgba(6, 182, 212, 0.50);
+  --accent-ai-glow-subtle: 0 0 8px -2px rgba(6, 182, 212, 0.25);
 
-/* ==========================================================================
-   LIGHT MODE OVERRIDES ([data-theme="light"])
-   Maintains identical semantic tokens with high-contrast daytime calibration.
-   ========================================================================== */
-[data-theme="light"] {
-  /* Background Hierarchy */
-  --bg-page: #F8FAFC;         /* Light slate page canvas */
-  --bg-card: #FFFFFF;         /* Pure crisp card surface */
-  --bg-raised: #F1F5F9;       /* Subtle raised elevation */
-  --bg-overlay: rgba(248, 250, 252, 0.85);
-
-  /* Structural Chrome & Neutrals */
-  --text-primary: #0F172A;    /* Slate-900 high contrast */
-  --text-secondary: #475569;  /* Slate-600 readable labels */
-  --text-muted: #64748B;      /* Slate-500 secondary metadata */
-  --text-disabled: #94A3B8;   /* Slate-400 disabled */
-
-  --border-default: #E2E8F0;  /* Clean light border */
-  --border-hover: #CBD5E1;    /* Hover border */
-  --border-focus: #0284C7;    /* Focus cyan-blue */
-
-  --neutral-subtle: #F8FAFC;
-  --neutral-disabled: #F1F5F9;
-
-  /* Card Shadow: Soft single token enabled for light mode */
-  --card-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 6px -1px rgba(15, 23, 42, 0.04);
-
-  /* Semantic Status Colors (Tuned for AA/AAA contrast on light backgrounds) */
-  --status-high: #059669;
-  --status-high-tint: rgba(5, 150, 105, 0.12);
-  --status-high-border: rgba(5, 150, 105, 0.24);
-
-  --status-medium: #D97706;
-  --status-medium-tint: rgba(217, 119, 6, 0.12);
-  --status-medium-border: rgba(217, 119, 6, 0.24);
-
-  --status-low: #DC2626;
-  --status-low-tint: rgba(220, 38, 38, 0.12);
-  --status-low-border: rgba(220, 38, 38, 0.24);
-
-  --accent-ai: #0284C7;
-  --accent-ai-tint: rgba(2, 132, 199, 0.12);
-  --accent-ai-border: rgba(2, 132, 199, 0.24);
-  --accent-ai-glow: rgba(2, 132, 199, 0.15);
+  /* Secondary Violet */
+  --accent-violet-tint: rgba(139, 92, 246, 0.12);
+  --accent-violet-border: rgba(139, 92, 246, 0.28);
+  --accent-violet-glow: 0 0 16px -4px rgba(139, 92, 246, 0.50);
 }
