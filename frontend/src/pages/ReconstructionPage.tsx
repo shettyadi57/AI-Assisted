@@ -50,6 +50,22 @@ interface GapItem {
   filler_type: string;
 }
 
+interface ProvenanceSpan {
+  output_start: number;
+  output_end: number;
+  length_bytes: number;
+  source_fragment_id: string;
+  original_evidence_offset: number;
+  original_evidence_id: string;
+  sha256_hash: string;
+  validation_status: string;
+  edge_confidence: number;
+  investigator_accepted: boolean;
+  is_synthetic_filler: boolean;
+  entropy: number;
+  note: string;
+}
+
 interface CandidateRecord {
   id: string;
   name: string;
@@ -73,6 +89,7 @@ interface CandidateRecord {
   evidence_strings: string[];
   gaps: GapItem[];
   fragments: CandidateFragmentItem[];
+  provenance?: ProvenanceSpan[];
   created_at: string;
   updated_at: string;
 }
@@ -134,6 +151,28 @@ export const ReconstructionPage: React.FC = () => {
   const [assembling, setAssembling] = useState<boolean>(false);
   const [fillerType, setFillerType] = useState<string>('zero_fill');
   const [activeCenterTab, setActiveCenterTab] = useState<'graph' | 'timeline' | 'result'>('graph');
+  const [selectedProvenanceSpan, setSelectedProvenanceSpan] = useState<ProvenanceSpan | null>(null);
+  const [previewModalOpen, setPreviewModalOpen] = useState<boolean>(false);
+  const [structureModalOpen, setStructureModalOpen] = useState<boolean>(false);
+  const [previewData, setPreviewData] = useState<any>(null);
+  const [previewLoading, setPreviewLoading] = useState<boolean>(false);
+
+  // Phase 10: Open preview handler
+  const handleOpenPreview = async () => {
+    if (!selectedCandidate) return;
+    setPreviewLoading(true);
+    setPreviewModalOpen(true);
+    try {
+      const res = await fetch(`/api/v1/reconstruction/candidates/${selectedCandidate.id}/preview`);
+      if (res.ok) {
+        setPreviewData(await res.json());
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
 
   // Load evidence
   useEffect(() => {
@@ -656,7 +695,11 @@ export const ReconstructionPage: React.FC = () => {
                       return (
                         <React.Fragment key={frag.fragment_id}>
                           <div
-                            onClick={() => setSelectedFragmentId(frag.fragment_id)}
+                            onClick={() => {
+                              setSelectedFragmentId(frag.fragment_id);
+                              const span = selectedCandidate.provenance?.find(p => p.source_fragment_id === frag.fragment_id);
+                              if (span) setSelectedProvenanceSpan(span);
+                            }}
                             style={{
                               minWidth: '100px', height: '60px', borderRadius: 'var(--radius-sm)',
                               background: frag.status === 'CORRUPTED' ? 'rgba(239,68,68,0.2)' : isSelected ? 'rgba(6,182,212,0.25)' : 'var(--bg-surface)',
@@ -677,11 +720,17 @@ export const ReconstructionPage: React.FC = () => {
                           </div>
 
                           {gap && (
-                            <div style={{
-                              minWidth: '80px', height: '60px', borderRadius: 'var(--radius-sm)',
-                              background: 'rgba(245,158,11,0.15)', border: '2px dashed #F59E0B',
-                              padding: '6px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-                            }}>
+                            <div
+                              onClick={() => {
+                                const gapSpan = selectedCandidate.provenance?.find(p => p.is_synthetic_filler && p.original_evidence_offset === gap.offset_expected);
+                                if (gapSpan) setSelectedProvenanceSpan(gapSpan);
+                              }}
+                              style={{
+                                minWidth: '80px', height: '60px', borderRadius: 'var(--radius-sm)',
+                                background: 'rgba(245,158,11,0.15)', border: '2px dashed #F59E0B',
+                                padding: '6px', cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                              }}
+                            >
                               <div style={{ fontSize: '9px', fontWeight: 700, color: '#FCD34D' }}>GAP</div>
                               <div className="font-mono" style={{ fontSize: '9px', color: '#FCD34D' }}>
                                 {formatBytes(gap.estimated_size_bytes)}
@@ -693,6 +742,133 @@ export const ReconstructionPage: React.FC = () => {
                       );
                     })}
                   </div>
+
+                  {/* Interactive Bit-Level Provenance Trace (Spec Section 19) */}
+                  <div style={{ marginTop: 'var(--space-4)', background: 'var(--bg-surface)', padding: 'var(--space-4)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-medium)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-3)' }}>
+                      <div style={{ fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        Bit-Level Provenance Trace (Spec Section 19)
+                      </div>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                        Output Range &rarr; Source Fragment &rarr; Original Offset &rarr; Validation Result
+                      </span>
+                    </div>
+
+                    {selectedProvenanceSpan ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                          <div style={{ background: 'var(--bg-page)', padding: '8px 10px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                            <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Output Byte Range</div>
+                            <div className="font-mono" style={{ fontSize: '12px', fontWeight: 700, color: '#06B6D4' }}>
+                              0x{selectedProvenanceSpan.output_start.toString(16).toUpperCase()} &ndash; 0x{selectedProvenanceSpan.output_end.toString(16).toUpperCase()}
+                            </div>
+                            <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                              {formatBytes(selectedProvenanceSpan.length_bytes)}
+                            </div>
+                          </div>
+
+                          <div style={{ background: 'var(--bg-page)', padding: '8px 10px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                            <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Source Fragment</div>
+                            <div className="font-mono" style={{ fontSize: '12px', fontWeight: 700, color: selectedProvenanceSpan.is_synthetic_filler ? '#F59E0B' : 'var(--text-primary)' }}>
+                              {selectedProvenanceSpan.is_synthetic_filler ? 'SYNTHETIC GAP' : selectedProvenanceSpan.source_fragment_id.slice(0, 12)}
+                            </div>
+                            <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                              {selectedProvenanceSpan.note}
+                            </div>
+                          </div>
+
+                          <div style={{ background: 'var(--bg-page)', padding: '8px 10px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                            <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Evidence Image Offset</div>
+                            <div className="font-mono" style={{ fontSize: '12px', fontWeight: 700, color: '#A78BFA' }}>
+                              0x{selectedProvenanceSpan.original_evidence_offset.toString(16).toUpperCase()}
+                            </div>
+                            <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                              Physical address on image
+                            </div>
+                          </div>
+
+                          <div style={{ background: 'var(--bg-page)', padding: '8px 10px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                            <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Validation Status</div>
+                            <div>
+                              <span style={{
+                                display: 'inline-block', padding: '1px 6px', borderRadius: '3px',
+                                fontSize: '11px', fontWeight: 700,
+                                background: selectedProvenanceSpan.validation_status === 'CORRUPTED' ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)',
+                                color: selectedProvenanceSpan.validation_status === 'CORRUPTED' ? '#F87171' : '#34D399',
+                              }}>
+                                {selectedProvenanceSpan.validation_status}
+                              </span>
+                            </div>
+                            <div className="font-mono" style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '4px', wordBreak: 'break-all' }}>
+                              SHA: {selectedProvenanceSpan.sha256_hash ? selectedProvenanceSpan.sha256_hash.slice(0, 16) + '...' : 'N/A'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', padding: '12px' }}>
+                        Click any timeline block above to inspect its bit-level provenance chain.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Complete Provenance Table */}
+                  {selectedCandidate.provenance && selectedCandidate.provenance.length > 0 && (
+                    <div style={{ marginTop: 'var(--space-3)', background: 'var(--bg-page)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', overflow: 'hidden' }}>
+                      <div style={{ padding: '8px 12px', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', borderBottom: '1px solid var(--border-subtle)' }}>
+                        Complete Bit-Level Provenance Mapping
+                      </div>
+                      <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
+                          <thead>
+                            <tr style={{ background: 'var(--bg-surface)', textAlign: 'left', borderBottom: '1px solid var(--border-subtle)' }}>
+                              <th style={{ padding: '6px 10px' }}>Output Range</th>
+                              <th style={{ padding: '6px 10px' }}>Length</th>
+                              <th style={{ padding: '6px 10px' }}>Source Fragment</th>
+                              <th style={{ padding: '6px 10px' }}>Evidence Offset</th>
+                              <th style={{ padding: '6px 10px' }}>Status</th>
+                              <th style={{ padding: '6px 10px' }}>SHA-256 Digest</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {selectedCandidate.provenance.map((span, idx) => (
+                              <tr
+                                key={idx}
+                                onClick={() => setSelectedProvenanceSpan(span)}
+                                style={{
+                                  cursor: 'pointer',
+                                  borderBottom: '1px solid var(--border-subtle)',
+                                  background: selectedProvenanceSpan?.output_start === span.output_start ? 'rgba(6,182,212,0.1)' : 'transparent',
+                                }}
+                              >
+                                <td className="font-mono" style={{ padding: '6px 10px', color: '#06B6D4' }}>
+                                  0x{span.output_start.toString(16).toUpperCase()} &ndash; 0x{span.output_end.toString(16).toUpperCase()}
+                                </td>
+                                <td style={{ padding: '6px 10px' }}>{formatBytes(span.length_bytes)}</td>
+                                <td className="font-mono" style={{ padding: '6px 10px' }}>
+                                  {span.is_synthetic_filler ? <span style={{ color: '#F59E0B', fontWeight: 700 }}>SYNTHETIC GAP</span> : span.source_fragment_id.slice(0, 10)}
+                                </td>
+                                <td className="font-mono" style={{ padding: '6px 10px', color: '#A78BFA' }}>
+                                  0x{span.original_evidence_offset.toString(16).toUpperCase()}
+                                </td>
+                                <td style={{ padding: '6px 10px' }}>
+                                  <span style={{
+                                    color: span.validation_status === 'CORRUPTED' ? '#F87171' : span.is_synthetic_filler ? '#F59E0B' : '#34D399',
+                                    fontWeight: 600,
+                                  }}>
+                                    {span.validation_status}
+                                  </span>
+                                </td>
+                                <td className="font-mono" style={{ padding: '6px 10px', color: 'var(--text-muted)' }}>
+                                  {span.sha256_hash ? span.sha256_hash.slice(0, 12) + '...' : '-'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -766,15 +942,62 @@ export const ReconstructionPage: React.FC = () => {
                         </tbody>
                       </table>
 
-                      <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', marginTop: 'var(--space-2)' }}>
+                        <button
+                          onClick={handleOpenPreview}
+                          className="btn-secondary"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: 'var(--text-xs)', padding: '6px 12px' }}
+                        >
+                          👁 Open Preview
+                        </button>
+
+                        <button
+                          onClick={() => setStructureModalOpen(true)}
+                          className="btn-secondary"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: 'var(--text-xs)', padding: '6px 12px' }}
+                        >
+                          🔍 Inspect Structure
+                        </button>
+
+                        <a
+                          href="/fragments"
+                          className="btn-secondary"
+                          style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: 'var(--text-xs)', padding: '6px 12px' }}
+                        >
+                          📑 View Fragments
+                        </a>
+
                         <a
                           href={`/api/v1/reconstruction/candidates/${selectedCandidate.id}/artifact`}
                           download
                           className="btn-primary"
-                          style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: 'var(--text-xs)', padding: '6px 14px' }}
+                          style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: 'var(--text-xs)', padding: '6px 12px' }}
                         >
-                          ⬇ Download Reconstructed {selectedCandidate.target_format.toUpperCase()}
+                          ⬇ Export Artifact ({selectedCandidate.target_format.toUpperCase()})
                         </a>
+
+                        <a
+                          href={`/api/v1/reconstruction/candidates/${selectedCandidate.id}/bundle`}
+                          download
+                          className="btn-secondary"
+                          style={{
+                            textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                            fontSize: 'var(--text-xs)', padding: '6px 12px', borderColor: '#0EA5E9', color: '#38BDF8',
+                          }}
+                        >
+                          📦 Export Bundle (.ZIP)
+                        </a>
+
+                        <button
+                          onClick={() => window.open(`/api/v1/reconstruction/candidates/${selectedCandidate.id}/report?format=html`, '_blank')}
+                          className="btn-secondary"
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '6px',
+                            fontSize: 'var(--text-xs)', padding: '6px 12px', borderColor: '#10B981', color: '#34D399',
+                          }}
+                        >
+                          📜 Generate Evidence Report
+                        </button>
                       </div>
                     </div>
                   ) : (
@@ -899,6 +1122,142 @@ export const ReconstructionPage: React.FC = () => {
         </div>
 
       </div>
+
+      {/* ══ PREVIEW MODAL ════════════════════════════════════════════════════ */}
+      {previewModalOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex',
+          alignItems: 'center', justifyContent: 'center', padding: '20px',
+        }}>
+          <div style={{
+            background: 'var(--bg-surface)', border: '1px solid var(--border-medium)',
+            borderRadius: 'var(--radius-lg)', maxWidth: '800px', width: '100%',
+            maxHeight: '90vh', overflowY: 'auto', padding: 'var(--space-5)',
+            display: 'flex', flexDirection: 'column', gap: 'var(--space-4)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '12px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 'var(--text-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  Artifact Preview: {selectedCandidate?.id} ({selectedCandidate?.target_format.toUpperCase()})
+                </h3>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  Rendered from disk in derived-artifacts repository (Spec Section 20)
+                </div>
+              </div>
+              <button className="btn-secondary" onClick={() => setPreviewModalOpen(false)} style={{ padding: '4px 8px' }}>
+                ✕ Close
+              </button>
+            </div>
+
+            {previewLoading ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading artifact preview...</div>
+            ) : previewData?.is_image && previewData?.data_url ? (
+              <div style={{ textAlign: 'center', background: 'var(--bg-page)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
+                <img src={previewData.data_url} alt="Artifact Preview" style={{ maxWidth: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '4px' }} />
+              </div>
+            ) : previewData?.is_pdf && previewData?.data_url ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>PDF Artifact Assembled Successfully:</div>
+                <iframe src={previewData.data_url} style={{ width: '100%', height: '400px', border: '1px solid var(--border-subtle)', borderRadius: '4px' }} />
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Binary Artifact Hex Preview:</div>
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: 600, color: '#38BDF8', marginBottom: '4px' }}>Header Bytes (0x0000..0x0040):</div>
+                  <pre className="font-mono" style={{ background: 'var(--bg-page)', padding: '10px', borderRadius: '4px', fontSize: '11px', overflowX: 'auto', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
+                    {previewData?.head_hex_preview || 'No header bytes preview available'}
+                  </pre>
+                </div>
+                {previewData?.tail_hex_preview && (
+                  <div>
+                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#34D399', marginBottom: '4px' }}>Trailer/EOF Bytes:</div>
+                    <pre className="font-mono" style={{ background: 'var(--bg-page)', padding: '10px', borderRadius: '4px', fontSize: '11px', overflowX: 'auto', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
+                      {previewData.tail_hex_preview}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
+              <a
+                href={`/api/v1/reconstruction/candidates/${selectedCandidate?.id}/artifact`}
+                download
+                className="btn-primary"
+                style={{ textDecoration: 'none', padding: '6px 14px', fontSize: 'var(--text-xs)' }}
+              >
+                ⬇ Download Artifact File
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ STRUCTURE INSPECTION MODAL ══════════════════════════════════════ */}
+      {structureModalOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex',
+          alignItems: 'center', justifyContent: 'center', padding: '20px',
+        }}>
+          <div style={{
+            background: 'var(--bg-surface)', border: '1px solid var(--border-medium)',
+            borderRadius: 'var(--radius-lg)', maxWidth: '850px', width: '100%',
+            maxHeight: '90vh', overflowY: 'auto', padding: 'var(--space-5)',
+            display: 'flex', flexDirection: 'column', gap: 'var(--space-4)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '12px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 'var(--text-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  Structural Analysis &amp; Sequence Map: {selectedCandidate?.id}
+                </h3>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  Format-internal parser indicators, offsets, and header/footer checks
+                </div>
+              </div>
+              <button className="btn-secondary" onClick={() => setStructureModalOpen(false)} style={{ padding: '4px 8px' }}>
+                ✕ Close
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              <div style={{ background: 'var(--bg-page)', padding: '12px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>Candidate Sequence Breakdown:</div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
+                  <thead>
+                    <tr style={{ background: 'var(--bg-surface)', textAlign: 'left', borderBottom: '1px solid var(--border-subtle)' }}>
+                      <th style={{ padding: '6px 8px' }}>Seq</th>
+                      <th style={{ padding: '6px 8px' }}>Fragment ID</th>
+                      <th style={{ padding: '6px 8px' }}>Evidence Offset</th>
+                      <th style={{ padding: '6px 8px' }}>Size</th>
+                      <th style={{ padding: '6px 8px' }}>Role</th>
+                      <th style={{ padding: '6px 8px' }}>Status</th>
+                      <th style={{ padding: '6px 8px' }}>SHA-256</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedCandidate?.fragments.map((frag) => (
+                      <tr key={frag.fragment_id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <td style={{ padding: '6px 8px', fontWeight: 700 }}>#{frag.sequence_order}</td>
+                        <td className="font-mono" style={{ padding: '6px 8px', color: '#06B6D4' }}>{frag.fragment_id.slice(0, 12)}</td>
+                        <td className="font-mono" style={{ padding: '6px 8px' }}>0x{frag.offset_start.toString(16).toUpperCase()}</td>
+                        <td style={{ padding: '6px 8px' }}>{formatBytes(frag.size_bytes)}</td>
+                        <td style={{ padding: '6px 8px' }}>{frag.role_guess}</td>
+                        <td style={{ padding: '6px 8px' }}>
+                          <span style={{ color: frag.status === 'CORRUPTED' ? '#F87171' : '#34D399', fontWeight: 600 }}>{frag.status}</span>
+                        </td>
+                        <td className="font-mono" style={{ padding: '6px 8px', color: 'var(--text-muted)' }}>{frag.sha256_hash.slice(0, 16)}...</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

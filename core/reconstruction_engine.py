@@ -27,11 +27,48 @@ class ProvenanceByteSpan:
     output_offset: int
     length_bytes: int
     source_fragment_id: str
-    fragment_offset: int
-    edge_confidence: float
+    fragment_offset: int = 0
+    edge_confidence: float = 1.0
     investigator_accepted: bool = False
     is_synthetic_filler: bool = False
     note: str = ""
+    # Phase 10 Enhancements (Spec Section 19 & 20)
+    output_end_offset: int = 0
+    original_evidence_offset: int = 0
+    original_evidence_id: str = ""
+    sha256_hash: str = ""
+    validation_status: str = "CONFIRMED"
+    entropy: float = 0.0
+
+    def to_dict(self) -> dict:
+        """Serialize provenance span to dictionary."""
+        end_off = self.output_end_offset if self.output_end_offset > 0 else max(0, self.output_offset + self.length_bytes - 1)
+        return {
+            "output_start": self.output_offset,
+            "output_end": end_off,
+            "length_bytes": self.length_bytes,
+            "source_fragment_id": self.source_fragment_id,
+            "original_evidence_offset": self.original_evidence_offset,
+            "original_evidence_id": self.original_evidence_id,
+            "sha256_hash": self.sha256_hash,
+            "validation_status": self.validation_status,
+            "edge_confidence": self.edge_confidence,
+            "investigator_accepted": self.investigator_accepted,
+            "is_synthetic_filler": self.is_synthetic_filler,
+            "entropy": self.entropy,
+            "note": self.note,
+        }
+
+
+def find_provenance_span_for_offset(
+    spans: Sequence[ProvenanceByteSpan], byte_offset: int
+) -> ProvenanceByteSpan | None:
+    """Query provenance span covering the specified reconstructed byte offset."""
+    for span in spans:
+        end = span.output_end_offset if span.output_end_offset > 0 else (span.output_offset + span.length_bytes - 1)
+        if span.output_offset <= byte_offset <= end:
+            return span
+    return None
 
 
 @dataclass
@@ -217,20 +254,36 @@ class ReconstructionEngine(ReconstructionEngineInterface):
         real_data_bytes = 0
         filler_bytes = 0
 
+        meta_lookup = {m.fragment_id: m for m in chain.ordered_fragments}
+        first_ev_id = chain.ordered_fragments[0].evidence_id if chain.ordered_fragments else ""
+
         for seq, fid in enumerate(chain.ordered_fragment_ids, start=1):
             chunk = fragment_store.get(fid, b"")
             sz = len(chunk)
             output_bytes.extend(chunk)
             real_data_bytes += sz
 
+            meta = meta_lookup.get(fid)
+            orig_off = meta.offset_start if meta else 0
+            ev_id = meta.evidence_id if meta else first_ev_id
+            sha = meta.sha256_hash if meta else hashlib.sha256(chunk).hexdigest()
+            status_val = meta.status.value if meta and hasattr(meta.status, "value") else str(meta.status if meta else "CONFIRMED")
+            ent = meta.entropy if meta else 0.0
+
             provenance.append(ProvenanceByteSpan(
                 output_offset=current_offset,
+                output_end_offset=current_offset + sz - 1,
                 length_bytes=sz,
                 source_fragment_id=fid,
                 fragment_offset=0,
+                original_evidence_offset=orig_off,
+                original_evidence_id=ev_id,
+                sha256_hash=sha,
+                validation_status=status_val,
                 edge_confidence=chain.composite_confidence,
                 investigator_accepted=False,
                 is_synthetic_filler=False,
+                entropy=ent,
                 note=f"Seq #{seq}: Fragment {fid[:8]} ({sz} bytes)",
             ))
             current_offset += sz
@@ -243,14 +296,21 @@ class ReconstructionEngine(ReconstructionEngineInterface):
                     gap_data = b"\x00" * gap_sz
                     output_bytes.extend(gap_data)
                     filler_bytes += gap_sz
+                    gap_sha = hashlib.sha256(gap_data).hexdigest()
                     provenance.append(ProvenanceByteSpan(
                         output_offset=current_offset,
+                        output_end_offset=current_offset + gap_sz - 1,
                         length_bytes=gap_sz,
                         source_fragment_id="GAP",
                         fragment_offset=0,
+                        original_evidence_offset=gap.offset_expected,
+                        original_evidence_id=first_ev_id,
+                        sha256_hash=gap_sha,
+                        validation_status="MISSING",
                         edge_confidence=0.0,
                         investigator_accepted=False,
                         is_synthetic_filler=True,
+                        entropy=0.0,
                         note=f"SYNTHETIC GAP FILLER ({gap_sz} bytes): {gap.description}",
                     ))
                     current_offset += gap_sz

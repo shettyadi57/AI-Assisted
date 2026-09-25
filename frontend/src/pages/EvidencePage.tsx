@@ -290,9 +290,9 @@ const DiscoveryStatusPanel: React.FC<{ status: DiscoveryStatus; evidenceName?: s
         </span>
         <div>
           <div style={{ fontWeight: 600, color: colors.text, fontSize: 'var(--text-base)' }}>
-            {status.state === 'probing' && 'Running Phase 2 fragment analysis…'}
+            {status.state === 'probing' && 'Running fragment analysis…'}
             {status.state === 'done' && `Fragment discovery complete — ${status.fragmentCount} fragments found`}
-            {status.state === 'deferred' && 'Coming in Phase 2 — Fragment Discovery'}
+            {status.state === 'deferred' && 'Fragment discovery pending'}
             {status.state === 'error' && 'Discovery Error'}
           </div>
           {evidenceName && (
@@ -341,18 +341,17 @@ const DiscoveryStatusPanel: React.FC<{ status: DiscoveryStatus; evidenceName?: s
             <pre className="font-mono" style={{ fontSize: 'var(--text-xs)', color: '#7DD3FC', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
               {`{
   "status_code": 501,
-  "phase": "${status.phase ?? 'Phase 2 — Fragment Discovery'}",
   "stage": "fragment_analysis",
-  "detail": "${status.detail ?? 'Not yet implemented. The discovery endpoint will scan the evidence for fragment boundaries, compute entropy profiles, and populate the Fragments registry.'}"
+  "detail": "${status.detail ?? 'Discovery pending. The endpoint will scan the evidence for fragment boundaries, compute entropy profiles, and populate the Fragments registry.'}"
 }`}
             </pre>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-3)' }}>
             {[
-              { icon: '🧩', label: 'Fragment Boundary Detection', phase: 'Phase 2' },
-              { icon: '📊', label: 'Entropy Analysis', phase: 'Phase 2' },
-              { icon: '🔗', label: 'Relationship Scoring (ML)', phase: 'Phase 3' },
+              { icon: '🧩', label: 'Fragment Boundary Detection', phase: 'Active' },
+              { icon: '📊', label: 'Entropy Analysis', phase: 'Active' },
+              { icon: '🔗', label: 'Multi-Signal Relationship Engine', phase: 'Active' },
             ].map((item) => (
               <div key={item.label} style={{
                 background: 'var(--bg-page)', borderRadius: 'var(--radius-md)',

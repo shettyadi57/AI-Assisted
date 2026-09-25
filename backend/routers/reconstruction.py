@@ -9,24 +9,31 @@ Endpoints:
 - GET  /api/v1/reconstruction/candidates/{id}/artifact — Download reconstructed artifact file
 """
 
-from __future__ import annotations
-
+import base64
+import hashlib
+import io
 import json
 import logging
+import uuid
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import APIRouter, Body, HTTPException, Query, status
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
 from backend.config import PROJECT_ROOT
 from backend.database import get_db_connection
+from backend.reporting import generate_html_report, generate_report_data
 from backend.schemas import (
     CandidateFragmentItem,
     CandidateListResponse,
     CandidateRecord,
     GapItem,
     GenerateCandidatesRequest,
+    ProvenanceQueryResponse,
+    ProvenanceResponse,
+    ProvenanceSpanRecord,
     ReassembleRequest,
 )
 from core.fragment_analyzer import FragmentMetadata, ForensicStatus
@@ -143,6 +150,7 @@ def _row_to_candidate_record(cand_row, conn) -> CandidateRecord:
         evidence_strings=json.loads(cand_row["evidence_strings_json"] or "[]"),
         gaps=gaps,
         fragments=frags,
+        provenance=json.loads(cand_row["provenance_json"] or "[]") if "provenance_json" in keys else [],
         created_at=cand_row["created_at"],
         updated_at=cand_row["updated_at"],
     )
@@ -397,19 +405,38 @@ async def assemble_candidate_endpoint(
         )
 
         now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+        prov_data = [p.to_dict() for p in reassembly.provenance_map]
+        prov_json = json.dumps(prov_data)
 
         conn.execute(
             """UPDATE candidates
                SET status = 'ACCEPTED', recovery_status = ?, reconstruction_sha256 = ?,
-                   artifact_path = ?, reconstructed_bytes = ?, is_finalized = 1, updated_at = ?
+                   artifact_path = ?, reconstructed_bytes = ?, provenance_json = ?, is_finalized = 1, updated_at = ?
                WHERE id = ?""",
             (
                 reassembly.status,
                 reassembly.reconstructed_sha256,
                 reassembly.artifact_path,
                 reassembly.real_data_bytes,
+                prov_json,
                 now,
                 candidate_id,
+            ),
+        )
+
+        # Record event in immutable forensic audit log (Spec Section 20)
+        audit_id = str(uuid.uuid4())
+        audit_payload = f"CANDIDATE_ASSEMBLED:{candidate_id}:{reassembly.reconstructed_sha256}:{now}"
+        audit_hash = hashlib.sha256(audit_payload.encode()).hexdigest()
+        conn.execute(
+            """INSERT INTO audit_log
+               (id, event_type, entity_type, entity_id, investigator_id, action_detail, entry_hash)
+               VALUES (?, 'CANDIDATE_ASSEMBLED', 'candidate', ?, 'investigator', ?, ?)""",
+            (
+                audit_id,
+                candidate_id,
+                f"Assembled candidate {candidate_id} ({reassembly.status}, {reassembly.total_output_bytes} bytes, SHA-256: {reassembly.reconstructed_sha256})",
+                audit_hash,
             ),
         )
         conn.commit()
@@ -447,3 +474,307 @@ async def download_artifact(candidate_id: str):
         filename=p.name,
         media_type=f"application/{ext}",
     )
+
+
+# ─── GET /candidates/{id}/provenance — Phase 10 Bit-Level Mapping ────────────
+
+@router.get(
+    "/candidates/{candidate_id}/provenance",
+    summary="Query bit-level provenance byte-map for reconstructed candidate",
+)
+async def get_candidate_provenance(
+    candidate_id: str,
+    offset: int | None = Query(None, description="Optional byte offset to query specific provenance span"),
+):
+    """
+    Returns the complete provenance byte-map linking output byte spans
+    to original source fragments and file offsets (Spec Section 19).
+    """
+    conn = get_db_connection()
+    try:
+        cand_row = conn.execute("SELECT * FROM candidates WHERE id = ?", (candidate_id,)).fetchone()
+        if not cand_row:
+            raise HTTPException(status_code=404, detail="Candidate not found")
+        keys = cand_row.keys() if hasattr(cand_row, "keys") else []
+        prov_list = json.loads(cand_row["provenance_json"] or "[]") if "provenance_json" in keys else []
+        total_bytes = cand_row["reconstructed_bytes"] or cand_row["total_size_bytes"] or 0
+    finally:
+        conn.close()
+
+    if offset is not None:
+        for span in prov_list:
+            s_start = span.get("output_start", 0)
+            s_end = span.get("output_end", 0)
+            if s_start <= offset <= s_end:
+                return {
+                    "candidate_id": candidate_id,
+                    "query_offset": offset,
+                    "found": True,
+                    "span": span,
+                }
+        return {
+            "candidate_id": candidate_id,
+            "query_offset": offset,
+            "found": False,
+            "span": None,
+        }
+
+    return {
+        "candidate_id": candidate_id,
+        "total_bytes": total_bytes,
+        "spans": prov_list,
+    }
+
+
+# ─── GET /candidates/{id}/report — Phase 10 Forensic Evidence Report ─────────
+
+@router.get(
+    "/candidates/{candidate_id}/report",
+    summary="Generate NIST FIPS compliant Forensic Evidence Report (HTML or JSON)",
+)
+async def get_candidate_report(
+    candidate_id: str,
+    format: str = Query("html", description="Output format: 'html' or 'json'"),
+):
+    """
+    Generate a complete, publication-grade Forensic Evidence Report for the candidate.
+    Includes evidence metadata, hashes, full provenance timeline, gap analysis,
+    and immutable chain of custody audit history (Spec Sections 19 & 20).
+    """
+    conn = get_db_connection()
+    try:
+        cand_row = conn.execute("SELECT * FROM candidates WHERE id = ?", (candidate_id,)).fetchone()
+        if not cand_row:
+            raise HTTPException(status_code=404, detail="Candidate not found")
+        ev_row = conn.execute("SELECT * FROM evidence WHERE id = ?", (cand_row["evidence_id"],)).fetchone()
+        if not ev_row:
+            raise HTTPException(status_code=404, detail="Evidence record not found")
+
+        cf_rows = conn.execute(
+            """SELECT cf.*, f.offset_start, f.offset_end, f.size_bytes, f.sha256_hash,
+                      f.status, f.inferred_format, f.role_guess, f.entropy
+               FROM candidate_fragments cf
+               JOIN fragments f ON cf.fragment_id = f.id
+               WHERE cf.candidate_id = ?
+               ORDER BY cf.sequence_order""",
+            (candidate_id,),
+        ).fetchall()
+
+        audit_rows = conn.execute(
+            "SELECT * FROM audit_log WHERE entity_id IN (?, ?) ORDER BY created_at ASC",
+            (candidate_id, cand_row["evidence_id"]),
+        ).fetchall()
+
+        keys = cand_row.keys() if hasattr(cand_row, "keys") else []
+        prov_list = json.loads(cand_row["provenance_json"] or "[]") if "provenance_json" in keys else []
+    finally:
+        conn.close()
+
+    report_dict = generate_report_data(
+        candidate=dict(cand_row),
+        evidence=dict(ev_row),
+        candidate_fragments=[dict(r) for r in cf_rows],
+        provenance_spans=prov_list,
+        audit_entries=[dict(a) for a in audit_rows],
+    )
+
+    if format.lower() == "json":
+        return JSONResponse(content=report_dict)
+
+    html_content = generate_html_report(report_dict)
+    return HTMLResponse(content=html_content)
+
+
+# ─── GET /candidates/{id}/bundle — Phase 10 Forensic Export Bundle ───────────
+
+@router.get(
+    "/candidates/{candidate_id}/bundle",
+    summary="Export complete forensic bundle ZIP (Artifact + Manifest + Provenance + Audit + Report)",
+)
+async def export_forensic_bundle(candidate_id: str):
+    """
+    Package and export candidate as a verifiable forensic bundle ZIP.
+    Contains reconstructed file, manifest.json, provenance_map.json, audit_trail.json,
+    and self-contained EVIDENCE_REPORT.html.
+    """
+    conn = get_db_connection()
+    try:
+        cand_row = conn.execute("SELECT * FROM candidates WHERE id = ?", (candidate_id,)).fetchone()
+        if not cand_row:
+            raise HTTPException(status_code=404, detail="Candidate not found")
+        if not cand_row["artifact_path"] or not Path(cand_row["artifact_path"]).exists():
+            raise HTTPException(status_code=400, detail="Candidate not yet assembled. Run assembly first.")
+
+        ev_row = conn.execute("SELECT * FROM evidence WHERE id = ?", (cand_row["evidence_id"],)).fetchone()
+        cf_rows = conn.execute(
+            """SELECT cf.*, f.offset_start, f.offset_end, f.size_bytes, f.sha256_hash,
+                      f.status, f.inferred_format, f.role_guess, f.entropy
+               FROM candidate_fragments cf
+               JOIN fragments f ON cf.fragment_id = f.id
+               WHERE cf.candidate_id = ?
+               ORDER BY cf.sequence_order""",
+            (candidate_id,),
+        ).fetchall()
+
+        audit_rows = conn.execute(
+            "SELECT * FROM audit_log WHERE entity_id IN (?, ?) ORDER BY created_at ASC",
+            (candidate_id, cand_row["evidence_id"]),
+        ).fetchall()
+
+        keys = cand_row.keys() if hasattr(cand_row, "keys") else []
+        prov_list = json.loads(cand_row["provenance_json"] or "[]") if "provenance_json" in keys else []
+    finally:
+        conn.close()
+
+    artifact_path = Path(cand_row["artifact_path"])
+    artifact_data = artifact_path.read_bytes()
+
+    # Generate full report data & HTML report
+    report_dict = generate_report_data(
+        candidate=dict(cand_row),
+        evidence=dict(ev_row),
+        candidate_fragments=[dict(r) for r in cf_rows],
+        provenance_spans=prov_list,
+        audit_entries=[dict(a) for a in audit_rows],
+    )
+    html_report = generate_html_report(report_dict)
+
+    manifest = {
+        "forensic_bundle_version": "1.0",
+        "tool_version": "reconstruct-v0.5.0-alpha",
+        "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "evidence": dict(ev_row),
+        "candidate": {
+            "id": cand_row["id"],
+            "name": cand_row["name"],
+            "target_format": cand_row["target_format"],
+            "recovery_status": cand_row["recovery_status"],
+            "composite_confidence": cand_row["composite_confidence"],
+            "coverage_pct": cand_row["coverage_pct"],
+            "total_size_bytes": cand_row["total_size_bytes"],
+            "reconstruction_sha256": cand_row["reconstruction_sha256"],
+        },
+        "fragment_sequence": [dict(r) for r in cf_rows],
+        "gaps": json.loads(cand_row["gaps_json"] or "[]"),
+        "reconstruction_config": {
+            "scorer": "deterministic",
+            "classifier": "signature",
+            "gap_handling": "zero_fill",
+        },
+    }
+
+    # Construct ZIP archive in-memory
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr(artifact_path.name, artifact_data)
+        zf.writestr("manifest.json", json.dumps(manifest, indent=2))
+        zf.writestr("provenance_map.json", json.dumps(prov_list, indent=2))
+        zf.writestr("audit_trail.json", json.dumps([dict(a) for a in audit_rows], indent=2))
+        zf.writestr("EVIDENCE_REPORT.html", html_report)
+
+    bundle_bytes = zip_buffer.getvalue()
+    bundle_sha256 = hashlib.sha256(bundle_bytes).hexdigest()
+
+    # Save bundle to derived-artifacts
+    bundle_path = ARTIFACTS_DIR / f"{candidate_id}_forensic_bundle.zip"
+    bundle_path.write_bytes(bundle_bytes)
+
+    # Record export in database
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+    export_id = str(uuid.uuid4())
+    conn = get_db_connection()
+    try:
+        conn.execute(
+            """INSERT INTO export_records
+               (id, candidate_id, evidence_id, export_type, export_filename,
+                export_path, export_sha256, size_bytes, tool_version, config_json, created_at)
+               VALUES (?, ?, ?, 'BUNDLE_ZIP', ?, ?, ?, ?, 'reconstruct-v0.5.0-alpha', '{}', ?)""",
+            (
+                export_id,
+                candidate_id,
+                cand_row["evidence_id"],
+                bundle_path.name,
+                str(bundle_path),
+                bundle_sha256,
+                len(bundle_bytes),
+                now,
+            ),
+        )
+        audit_id = str(uuid.uuid4())
+        audit_payload = f"BUNDLE_EXPORTED:{export_id}:{bundle_sha256}:{now}"
+        audit_hash = hashlib.sha256(audit_payload.encode()).hexdigest()
+        conn.execute(
+            """INSERT INTO audit_log
+               (id, event_type, entity_type, entity_id, investigator_id, action_detail, entry_hash)
+               VALUES (?, 'BUNDLE_EXPORTED', 'candidate', ?, 'investigator', ?, ?)""",
+            (
+                audit_id,
+                candidate_id,
+                f"Exported forensic bundle {bundle_path.name} (SHA-256: {bundle_sha256})",
+                audit_hash,
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    return FileResponse(
+        path=str(bundle_path),
+        filename=bundle_path.name,
+        media_type="application/zip",
+        headers={"X-Export-SHA256": bundle_sha256},
+    )
+
+
+# ─── GET /candidates/{id}/preview — Phase 10 Artifact Preview ────────────────
+
+@router.get(
+    "/candidates/{candidate_id}/preview",
+    summary="Get preview representation of the reconstructed candidate",
+)
+async def get_candidate_preview(candidate_id: str):
+    """
+    Return base64 / binary preview representation of the reconstructed artifact.
+    """
+    conn = get_db_connection()
+    try:
+        cand_row = conn.execute("SELECT * FROM candidates WHERE id = ?", (candidate_id,)).fetchone()
+        if not cand_row:
+            raise HTTPException(status_code=404, detail="Candidate not found")
+        if not cand_row["artifact_path"]:
+            raise HTTPException(status_code=400, detail="Candidate not yet assembled.")
+    finally:
+        conn.close()
+
+    p = Path(cand_row["artifact_path"])
+    if not p.exists():
+        raise HTTPException(status_code=404, detail="Artifact file missing on disk")
+
+    ext = cand_row["target_format"].lower()
+    data = p.read_bytes()
+    sz = len(data)
+
+    is_image = ext in ("jpeg", "jpg", "png", "gif")
+    is_pdf = ext == "pdf"
+
+    head_hex = data[:64].hex(" ").upper()
+    tail_hex = data[-64:].hex(" ").upper() if sz > 64 else ""
+
+    b64_data = ""
+    if is_image and sz < 5 * 1024 * 1024:
+        mime = f"image/{'jpeg' if ext in ('jpeg', 'jpg') else ext}"
+        b64_data = f"data:{mime};base64," + base64.b64encode(data).decode()
+    elif is_pdf and sz < 5 * 1024 * 1024:
+        b64_data = f"data:application/pdf;base64," + base64.b64encode(data).decode()
+
+    return {
+        "candidate_id": candidate_id,
+        "filename": p.name,
+        "format": cand_row["target_format"],
+        "size_bytes": sz,
+        "is_image": is_image,
+        "is_pdf": is_pdf,
+        "data_url": b64_data,
+        "head_hex_preview": head_hex,
+        "tail_hex_preview": tail_hex,
+    }

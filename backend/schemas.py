@@ -261,8 +261,38 @@ class CandidateRecord(BaseModel):
     evidence_strings: list[str] = Field(default_factory=list)
     gaps: list[GapItem] = Field(default_factory=list)
     fragments: list[CandidateFragmentItem] = Field(default_factory=list)
+    provenance: list[dict[str, Any]] = Field(default_factory=list)
     created_at: str
     updated_at: str
+
+
+class ProvenanceSpanRecord(BaseModel):
+    output_start: int
+    output_end: int
+    length_bytes: int
+    source_fragment_id: str
+    original_evidence_offset: int
+    original_evidence_id: str = ""
+    sha256_hash: str = ""
+    validation_status: str = "CONFIRMED"
+    edge_confidence: float = 1.0
+    investigator_accepted: bool = False
+    is_synthetic_filler: bool = False
+    entropy: float = 0.0
+    note: str = ""
+
+
+class ProvenanceResponse(BaseModel):
+    candidate_id: str
+    total_bytes: int
+    spans: list[ProvenanceSpanRecord]
+
+
+class ProvenanceQueryResponse(BaseModel):
+    candidate_id: str
+    query_offset: int
+    found: bool
+    span: ProvenanceSpanRecord | None = None
 
 
 class CandidateListResponse(BaseModel):
@@ -282,3 +312,4 @@ class EdgeDecisionRequest(BaseModel):
 
 class ReassembleRequest(BaseModel):
     filler_type: str = Field(default="zero_fill", description="zero_fill or omit")
+

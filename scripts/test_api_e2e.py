@@ -59,4 +59,35 @@ with TestClient(app) as client:
         z_asm = r_zip.json()
         print(f"7. ZIP Candidate: Status={z_asm['status']}, Coverage={z_asm['coverage_pct']}%, Gaps={len(z_asm['gaps'])}")
 
-print("\nALL API END-TO-END TESTS PASSED!")
+    # 8. Test Bit-level provenance
+    r_prov = client.get(f"/api/v1/reconstruction/candidates/{top_cand['id']}/provenance")
+    assert r_prov.status_code == 200, r_prov.text
+    prov_spans = r_prov.json()['spans']
+    print(f"8. Bit-Level Provenance: {len(prov_spans)} spans mapped")
+    r_prov_q = client.get(f"/api/v1/reconstruction/candidates/{top_cand['id']}/provenance?offset=0")
+    assert r_prov_q.status_code == 200, r_prov_q.text
+    assert r_prov_q.json()['found'] is True
+    print(f"   Queried offset 0: mapped to fragment {r_prov_q.json()['span']['source_fragment_id'][:8]} at evidence offset 0x{r_prov_q.json()['span']['original_evidence_offset']:X}")
+
+    # 9. Test Forensic Evidence Report (HTML & JSON)
+    r_rep_html = client.get(f"/api/v1/reconstruction/candidates/{top_cand['id']}/report?format=html")
+    assert r_rep_html.status_code == 200, r_rep_html.text
+    assert "FORENSIC EVIDENCE REPORT" in r_rep_html.text
+    r_rep_json = client.get(f"/api/v1/reconstruction/candidates/{top_cand['id']}/report?format=json")
+    assert r_rep_json.status_code == 200, r_rep_json.text
+    print(f"9. Generated Evidence Report (HTML size: {len(r_rep_html.text)} chars, JSON summary ok)")
+
+    # 10. Test Forensic Bundle ZIP Export
+    r_bundle = client.get(f"/api/v1/reconstruction/candidates/{top_cand['id']}/bundle")
+    assert r_bundle.status_code == 200, r_bundle.text
+    assert "application/zip" in r_bundle.headers["content-type"]
+    bundle_sha = r_bundle.headers.get("X-Export-SHA256")
+    print(f"10. Exported Forensic Bundle: {len(r_bundle.content)} bytes (SHA-256: {bundle_sha[:16]}...)")
+
+    # 11. Test Candidate Preview
+    r_prev = client.get(f"/api/v1/reconstruction/candidates/{top_cand['id']}/preview")
+    assert r_prev.status_code == 200, r_prev.text
+    prev = r_prev.json()
+    print(f"11. Candidate Preview: format={prev['format']} is_pdf={prev['is_pdf']} size={prev['size_bytes']} bytes")
+
+print("\nALL API END-TO-END TESTS PASSED (PHASES 1-5, 9, 10 VERIFIED)!")

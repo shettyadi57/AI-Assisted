@@ -78,6 +78,7 @@ def _ensure_phase3_4_5_columns(conn: sqlite3.Connection) -> None:
         "evidence_strings_json":  "ALTER TABLE candidates ADD COLUMN evidence_strings_json TEXT NOT NULL DEFAULT '[]'",
         "artifact_path":          "ALTER TABLE candidates ADD COLUMN artifact_path TEXT",
         "recovery_status":        "ALTER TABLE candidates ADD COLUMN recovery_status TEXT DEFAULT 'UNCERTAIN'",
+        "provenance_json":        "ALTER TABLE candidates ADD COLUMN provenance_json TEXT NOT NULL DEFAULT '[]'",
     }
     for col, ddl in cand_cols.items():
         if col not in existing_cand:
