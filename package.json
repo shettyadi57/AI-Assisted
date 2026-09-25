@@ -1,19 +1,24 @@
 {
-  "name": "reconstruct-forensics-dashboard",
-  "version": "1.0.0",
-  "description": "Reconstruct — AI-assisted digital forensics dashboard for cybersecurity storage reconstruction",
-  "main": "server.js",
+  "name": "reconstruct-forensics-monorepo",
+  "version": "0.1.0",
+  "description": "Reconstruct — Investigator-grade AI-assisted digital forensics workbench for file fragment reconstruction",
+  "private": true,
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "test": "npm run test:core && npm run test:frontend",
+    "test:all": "npm run test:core && npm run test:backend && npm run test:frontend",
+    "test:core": "python scripts/run_pytest.py core/tests -v",
+    "test:backend": "python scripts/run_pytest.py backend/tests -v",
+    "test:frontend": "npm --prefix frontend test",
+    "dev:backend": "python -m uvicorn backend.main:app --reload --port 8000",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:frontend": "npm --prefix frontend run build"
   },
   "keywords": [
-    "forensics",
+    "digital-forensics",
+    "file-carving",
+    "fragment-reconstruction",
     "cybersecurity",
-    "design-system",
-    "tokens",
-    "hex-carving",
-    "storage"
+    "provenance"
   ],
   "author": "Reconstruct Forensics Team",
   "license": "MIT"

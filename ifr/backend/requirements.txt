@@ -7,7 +7,8 @@ fastapi==0.111.0
 uvicorn[standard]==0.30.1
 
 # Database (SQLite ORM)
-sqlalchemy==2.0.30
+sqlalchemy[asyncio]==2.0.30
+greenlet==3.0.3               # required by SQLAlchemy async on Python 3.13+
 aiosqlite==0.20.0            # async SQLite driver for SQLAlchemy async sessions
 
 # Validation / serialization

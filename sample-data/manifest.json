@@ -1,0 +1,40 @@
+{
+  "dataset": "Synthetic JPEG Fragment Cluster",
+  "version": "1.0.0",
+  "sector_size": 512,
+  "target_format": "jpeg",
+  "fragments": [
+    {
+      "filename": "fragment_001_jpeg_header.bin",
+      "size_bytes": 512,
+      "sha256": "a91e0f2b803a06e2ce3f3ba43a95cf0e54a60dae7db9c9a3a590883d37b76d01"
+    },
+    {
+      "filename": "fragment_002_jpeg_entropy.bin",
+      "size_bytes": 512,
+      "sha256": "5c72a922b79683f1949e4fc8773340e2f7ae38e57cdb897953d73d8ce9eee5d0"
+    },
+    {
+      "filename": "fragment_003_jpeg_eoi.bin",
+      "size_bytes": 512,
+      "sha256": "801481fab3b72a3838d68ba71dc65caf62fd2c5bd1ec29e434bc0b41ff056738"
+    },
+    {
+      "filename": "fragment_004_corrupted_slack.bin",
+      "size_bytes": 512,
+      "sha256": "07d56701645ce1c09abca1f6808e5aa029db93d8d6a2bd82b045fe0d4ce485d8"
+    }
+  ],
+  "ground_truth_edges": [
+    {
+      "source": "fragment_001_jpeg_header.bin",
+      "target": "fragment_002_jpeg_entropy.bin",
+      "confidence": 0.95
+    },
+    {
+      "source": "fragment_002_jpeg_entropy.bin",
+      "target": "fragment_003_jpeg_eoi.bin",
+      "confidence": 0.91
+    }
+  ]
+}
