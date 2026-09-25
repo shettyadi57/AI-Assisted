@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Reconstruct — AI-assisted digital forensics dashboard design tokens & component showcase (Chunk 1/5).">
+  <title>Reconstruct // Forensic Design System & Tokens (Chunk 1)</title>
+  
+  <!-- Modern Forensic Typography: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="showcase.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- ═══════════════════════════════════════════════════════════════════
+         SHOWCASE HEADER & BRAND BAR
+         ═══════════════════════════════════════════════════════════════════ -->
+    <header class="showcase-header">
+      <div>
+        <div class="brand-badge">
+          <span class="pulse-indicator"></span>
+          <span>RECONSTRUCT // SYSTEM SPECIFICATION</span>
+          <span>•</span>
+          <span>CHUNK 1 / 5</span>
+        </div>
+        <h1 class="showcase-title">Forensic Design System & Tokens</h1>
+        <p class="showcase-subtitle">
+          Pixel-disciplined visual architecture for AI-assisted storage forensics. Built on a strict 4px modular spacing scale, 12-column responsive grid, dual typography split, and calibrated charcoal elevations.
+        </p>
+      </div>
+
+      <div class="header-controls">
+        <a href="index.html" class="btn btn-secondary" style="font-size: var(--text-sm);">
+          <span data-icon="layoutDashboard" data-icon-size="16"></span>
+          <span>Go to Main Dashboard (Chunk 2)</span>
+        </a>
+        <button id="theme-toggle-btn" class="theme-toggle-btn" aria-label="Toggle forensic dark/light theme">
+          <span id="theme-icon" data-icon="moon" data-icon-size="16"></span>
+          <span id="theme-label">Forensic Dark</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         SELF-CHECK VERIFICATION ENGINE (Automated Audit Panel)
+         ═══════════════════════════════════════════════════════════════════ -->
+    <section class="rhythm-region">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span data-icon="shield-check" data-icon-size="20" style="color: var(--accent-ai);"></span>
+            <span>Chunk 1 Compliance & Self-Check Audit</span>
+          </div>
+          <span class="badge badge-accent-ai">LIVE AUDIT ENGINE</span>
+        </div>
+
+        <div class="checklist-item">
+          <div class="check-status"><span data-icon="check" data-icon-size="16"></span></div>
+          <div style="flex-grow: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="checklist-title">Hashes, IDs, and Timestamps Monospace Hard Rule</span>
+              <span id="check-mono-status"></span>
+            </div>
+            <p id="check-mono-details" class="checklist-desc"></p>
+          </div>
+        </div>
+
+        <div class="checklist-item">
+          <div class="check-status"><span data-icon="check" data-icon-size="16"></span></div>
+          <div style="flex-grow: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="checklist-title">Status Colors & Paired Background Tint Tokens</span>
+              <span id="check-tints-status"></span>
+            </div>
+            <p id="check-tints-details" class="checklist-desc"></p>
+          </div>
+        </div>
+
+        <div class="checklist-item">
+          <div class="check-status"><span data-icon="check" data-icon-size="16"></span></div>
+          <div style="flex-grow: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="checklist-title">4px Modular Spacing System (No Arbitrary Values)</span>
+              <span id="check-spacing-status"></span>
+            </div>
+            <p id="check-spacing-details" class="checklist-desc"></p>
+          </div>
+        </div>
+
+        <div class="checklist-item">
+          <div class="check-status"><span data-icon="check" data-icon-size="16"></span></div>
+          <div style="flex-grow: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="checklist-title">Zero Arbitrary Pixel Inspection & Component Radii</span>
+              <span id="check-arbitrary-status"></span>
+            </div>
+            <p id="check-arbitrary-details" class="checklist-desc"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         1. VISUAL THEME: FORENSIC DARK ELEVATION & STATUS MATRIX
+         ═══════════════════════════════════════════════════════════════════ -->
+    <section class="rhythm-region">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span data-icon="cpu" data-icon-size="20"></span>
+          <span>1. Surface Elevations & Semantic Palette</span>
+        </h2>
+        <span class="section-tag">TOKENS // COLOR & BACKGROUND</span>
+      </div>
+
+      <h3 style="font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: var(--space-12); text-transform: uppercase; letter-spacing: 0.05em;">
+        Surface Layer Elevations (Never Pure #000)
+      </h3>
+      <div class="swatch-grid rhythm-section">
+        <div class="swatch-card" data-copy="var(--bg-page)">
+          <div class="swatch-preview" style="background-color: var(--bg-page); border-bottom: var(--border-width) solid var(--border-default);">
+            <span class="badge badge-neutral" style="font-size: 10px;">LAYER 0</span>
+          </div>
+          <div class="swatch-details">
+            <div class="swatch-name">Page Background</div>
+            <div class="swatch-token">--bg-page</div>
+            <div class="swatch-hex">Forensic Deep Ground</div>
+          </div>
+        </div>
+
+        <div class="swatch-card" data-copy="var(--bg-card)">
+          <div class="swatch-preview" style="background-color: var(--bg-card); border-bottom: var(--border-width) solid var(--border-default);">
+            <span class="badge badge-neutral" style="font-size: 10px;">LAYER 1</span>
+          </div>
+          <div class="swatch-details">
+            <div class="swatch-name">Card Surface</div>
+            <div class="swatch-token">--bg-card</div>
+            <div class="swatch-hex">Mid-Elevation Container</div>
+          </div>
+        </div>
+
+        <div class="swatch-card" data-copy="var(--bg-raised)">
+          <div class="swatch-preview" style="background-color: var(--bg-raised); border-bottom: var(--border-width) solid var(--border-default);">
+            <span class="badge badge-neutral" style="font-size: 10px;">LAYER 2</span>
+          </div>
+          <div class="swatch-details">
+            <div class="swatch-name">Raised Element</div>
+            <div class="swatch-token">--bg-raised</div>
+            <div class="swatch-hex">Interactive/Elevated Layer</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: var(--space-12); text-transform: uppercase; letter-spacing: 0.05em;">
+        Semantic Status & AI Accent Tokens (With Paired 12% Tints)
+      </h3>
+      <div class="swatch-grid">
+        <div class="swatch-card" data-copy="var(--status-high)">
+          <div class="swatch-preview" style="background-color: var(--status-high-tint); border: var(--border-width) solid var(--status-high-border);">
+            <span class="badge badge-status-high">99.4% CONFIDENT</span>
+          </div>
+          <div class="swatch-details">
+            <div class="swatch-name">Status High (Reconstructed)</div>
+            <div class="swatch-token">--status-high / --status-high-tint</div>
+            <div class="swatch-hex">Emerald Family</div>
+          </div>
+        </div>
+
+        <div class="swatch-card" data-copy="var(--status-medium)">
+          <div class="swatch-preview" style="background-color: var(--status-medium-tint); border: var(--border-width) solid var(--status-medium-border);">
+            <span class="badge badge-status-medium">72.0% REVIEW</span>
+          </div>
+          <div class="swatch-details">
+            <div class="swatch-name">Status Medium (Needs Review)</div>
+            <div class="swatch-token">--status-medium / --status-medium-tint</div>
+            <div class="swatch-hex">Amber Family</div>
+          </div>
+        </div>
+
+        <div class="swatch-card" data-copy="var(--status-low)">
+          <div class="swatch-preview" style="background-color: var(--status-low-tint); border: var(--border-width) solid var(--status-low-border);">
+            <span class="badge badge-status-low">0.0% CORRUPTED</span>
+          </div>
+          <div class="swatch-details">
+            <div class="swatch-name">Status Low (Unrecoverable)</div>
+            <div class="swatch-token">--status-low / --status-low-tint</div>
+            <div class="swatch-hex">Crimson Family</div>
+          </div>
+        </div>
+
+        <div class="swatch-card" data-copy="var(--accent-ai)">
+          <div class="swatch-preview" style="background-color: var(--accent-ai-tint); border: var(--border-width) solid var(--accent-ai-border);">
+            <span class="badge badge-accent-ai">
+              <span class="pulse-indicator"></span>
+              AI SCANNER
+            </span>
+          </div>
+          <div class="swatch-details">
+            <div class="swatch-name">AI Analysis Accent</div>
+            <div class="swatch-token">--accent-ai / --accent-ai-tint</div>
+            <div class="swatch-hex">High-Tech Cyan Family</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         2. STRICT DUAL TYPOGRAPHY ARCHITECTURE
+         ═══════════════════════════════════════════════════════════════════ -->
+    <section class="rhythm-region">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span data-icon="terminal" data-icon-size="20"></span>
+          <span>2. Strict Typography Split</span>
+        </h2>
+        <span class="section-tag">HARD RULE // SANS-SERIF vs MONOSPACE</span>
+      </div>
+
+      <div class="grid-container">
+        <div class="card col-span-6">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="badge badge-neutral">UI SANS-SERIF</span>
+              <span>Labels, Prose & Nav (Inter)</span>
+            </div>
+            <span class="badge badge-neutral">var(--font-sans)</span>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: var(--space-12);">
+            <div>
+              <div style="font-size: var(--text-xs); color: var(--text-muted);">--text-3xl (32px Bold)</div>
+              <div style="font-size: var(--text-3xl); font-weight: var(--font-bold); color: var(--text-primary);">Storage Forensics Engine</div>
+            </div>
+            <div>
+              <div style="font-size: var(--text-xs); color: var(--text-muted);">--text-2xl (24px Semibold)</div>
+              <div style="font-size: var(--text-2xl); font-weight: var(--font-semibold); color: var(--text-primary);">Fragment Reconstruction</div>
+            </div>
+            <div>
+              <div style="font-size: var(--text-xs); color: var(--text-muted);">--text-lg (18px Medium)</div>
+              <div style="font-size: var(--text-lg); font-weight: var(--font-medium); color: var(--text-primary);">Partition Table Analysis & Deep Carving</div>
+            </div>
+            <div>
+              <div style="font-size: var(--text-xs); color: var(--text-muted);">--text-sm (14px Normal Body)</div>
+              <div style="font-size: var(--text-sm); color: var(--text-secondary); line-height: var(--leading-relaxed);">
+                Investigator workbench for evaluating neural file carving outputs across non-contiguous physical disk blocks.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card col-span-6">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="badge badge-accent-ai">TECHNICAL MONOSPACE</span>
+              <span>Forensic Data Values ONLY</span>
+            </div>
+            <span class="badge badge-accent-ai">var(--font-mono)</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: var(--space-12);">
+            <div>
+              <div class="form-label">SHA-256 Hash (.file-hash)</div>
+              <div class="file-hash" style="padding: var(--space-4) 0;" data-copy="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855">
+                e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+              </div>
+            </div>
+
+            <div style="display: flex; gap: var(--space-12); align-items: center; flex-wrap: wrap;">
+              <div>
+                <div class="form-label">Block ID (.block-id)</div>
+                <span class="block-id">BLK-0x004F:SEC-8192</span>
+              </div>
+              <div>
+                <div class="form-label">Byte Offset (.byte-offset)</div>
+                <span class="byte-offset">0x001A8F00 - 0x001A9000</span>
+              </div>
+              <div>
+                <div class="form-label">File Size (.file-size)</div>
+                <span class="file-size" style="color: var(--text-primary);">16,777,216 B [16.00 MB]</span>
+              </div>
+            </div>
+
+            <div>
+              <div class="form-label">Forensic Timestamp (.timestamp)</div>
+              <span class="timestamp">2026-09-25T15:12:35.409Z [UTC+00:00]</span>
+            </div>
+
+            <div>
+              <div class="form-label">Hex Chunk Preview (.hex-preview)</div>
+              <div class="hex-preview">
+                4D 5A 90 00 03 00 00 00 04 00 00 00 FF FF 00 00 | MZ..............
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         3. 4px MODULAR SPACING SYSTEM & 12-COLUMN GRID
+         ═══════════════════════════════════════════════════════════════════ -->
+    <section class="rhythm-region">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span data-icon="hardDrive" data-icon-size="20"></span>
+          <span>3. 4px Modular Spacing & 12-Column Grid</span>
+        </h2>
+        <span class="section-tag">STRICT BASE 4px // ZERO ARBITRARY VALUES</span>
+      </div>
+
+      <div class="card rhythm-section">
+        <div class="card-header">
+          <div class="card-title">Spatial Scale (4px Base Unit Progression)</div>
+          <span class="badge badge-neutral">4, 8, 12, 16, 24, 32, 48, 64</span>
+        </div>
+
+        <div class="spacing-row">
+          <div class="spacing-meta">
+            <div class="spacing-token-name">--space-4</div>
+            <div class="spacing-token-value">4px (Micro / Tag padding)</div>
+          </div>
+          <div class="spacing-bar-container">
+            <div class="spacing-bar" style="width: 4px;"></div>
+          </div>
+        </div>
+
+        <div class="spacing-row">
+          <div class="spacing-meta">
+            <div class="spacing-token-name">--space-8</div>
+            <div class="spacing-token-value">8px (Element gap / Mobile gutter)</div>
+          </div>
+          <div class="spacing-bar-container">
+            <div class="spacing-bar" style="width: 8px;"></div>
+          </div>
+        </div>
+
+        <div class="spacing-row">
+          <div class="spacing-meta">
+            <div class="spacing-token-name">--space-12</div>
+            <div class="spacing-token-value">12px (Dense cell padding)</div>
+          </div>
+          <div class="spacing-bar-container">
+            <div class="spacing-bar" style="width: 12px;"></div>
+          </div>
+        </div>
+
+        <div class="spacing-row">
+          <div class="spacing-meta">
+            <div class="spacing-token-name">--space-16</div>
+            <div class="spacing-token-value">16px (Form field rhythm / Tablet)</div>
+          </div>
+          <div class="spacing-bar-container">
+            <div class="spacing-bar" style="width: 16px;"></div>
+          </div>
+        </div>
+
+        <div class="spacing-row">
+          <div class="spacing-meta">
+            <div class="spacing-token-name">--space-24</div>
+            <div class="spacing-token-value">24px (Section rhythm / Desktop)</div>
+          </div>
+          <div class="spacing-bar-container">
+            <div class="spacing-bar" style="width: 24px;"></div>
+          </div>
+        </div>
+
+        <div class="spacing-row">
+          <div class="spacing-meta">
+            <div class="spacing-token-name">--space-32</div>
+            <div class="spacing-token-value">32px (Region rhythm / Major gap)</div>
+          </div>
+          <div class="spacing-bar-container">
+            <div class="spacing-bar" style="width: 32px;"></div>
+          </div>
+        </div>
+
+        <div class="spacing-row">
+          <div class="spacing-meta">
+            <div class="spacing-token-name">--space-48</div>
+            <div class="spacing-token-value">48px (Macro component rhythm)</div>
+          </div>
+          <div class="spacing-bar-container">
+            <div class="spacing-bar" style="width: 48px;"></div>
+          </div>
+        </div>
+
+        <div class="spacing-row">
+          <div class="spacing-meta">
+            <div class="spacing-token-name">--space-64</div>
+            <div class="spacing-token-value">64px (Page layout rhythm)</div>
+          </div>
+          <div class="spacing-bar-container">
+            <div class="spacing-bar" style="width: 64px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">12-Column Responsive Layout Grid</div>
+          <div style="display: flex; gap: var(--space-8); align-items: center;">
+            <span class="badge badge-accent-ai" id="active-gutter-metric">24px (Desktop Gutter)</span>
+            <span class="badge badge-neutral">12 COLS</span>
+          </div>
+        </div>
+
+        <div class="grid-container" style="margin-bottom: var(--space-16);">
+          <div class="col-span-1 grid-preview-box">1</div>
+          <div class="col-span-1 grid-preview-box">2</div>
+          <div class="col-span-1 grid-preview-box">3</div>
+          <div class="col-span-1 grid-preview-box">4</div>
+          <div class="col-span-1 grid-preview-box">5</div>
+          <div class="col-span-1 grid-preview-box">6</div>
+          <div class="col-span-1 grid-preview-box">7</div>
+          <div class="col-span-1 grid-preview-box">8</div>
+          <div class="col-span-1 grid-preview-box">9</div>
+          <div class="col-span-1 grid-preview-box">10</div>
+          <div class="col-span-1 grid-preview-box">11</div>
+          <div class="col-span-1 grid-preview-box">12</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="margin-top: var(--space-48); padding-top: var(--space-24); border-top: var(--border-width) solid var(--border-default); display: flex; justify-content: space-between; align-items: center; font-size: var(--text-xs); color: var(--text-muted); flex-wrap: wrap; gap: var(--space-12);">
+      <div>
+        <span>RECONSTRUCT // DIGITAL FORENSICS</span>
+        <span style="margin: 0 var(--space-8);">•</span>
+        <span>Chunk 1 of 5: Tokens & Design System Specification Complete</span>
+      </div>
+      <div class="font-mono">
+        TOKENS VERIFIED // ZERO ARBITRARY VALUES // 4px BASE
+      </div>
+    </footer>
+
+  </div>
+
+  <div id="toast" class="toast">Token Copied</div>
+
+  <script src="icons.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
